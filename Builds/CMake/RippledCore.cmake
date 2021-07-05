@@ -289,26 +289,27 @@ install (
 # WARNING!! -- horrible levelization ahead
 # (these files should be isolated or moved...but
 #  unfortunately unit_test.h above creates this dependency)
-install (
-  FILES
-    src/beast/extras/beast/unit_test/amount.hpp
-    src/beast/extras/beast/unit_test/dstream.hpp
-    src/beast/extras/beast/unit_test/global_suites.hpp
-    src/beast/extras/beast/unit_test/match.hpp
-    src/beast/extras/beast/unit_test/recorder.hpp
-    src/beast/extras/beast/unit_test/reporter.hpp
-    src/beast/extras/beast/unit_test/results.hpp
-    src/beast/extras/beast/unit_test/runner.hpp
-    src/beast/extras/beast/unit_test/suite.hpp
-    src/beast/extras/beast/unit_test/suite_info.hpp
-    src/beast/extras/beast/unit_test/suite_list.hpp
-    src/beast/extras/beast/unit_test/thread.hpp
-  DESTINATION include/beast/unit_test)
-install (
-  FILES
-    src/beast/extras/beast/unit_test/detail/const_container.hpp
-  DESTINATION include/beast/unit_test/detail)
-
+if (tests)
+    install (
+      FILES
+        src/beast/extras/beast/unit_test/amount.hpp
+        src/beast/extras/beast/unit_test/dstream.hpp
+        src/beast/extras/beast/unit_test/global_suites.hpp
+        src/beast/extras/beast/unit_test/match.hpp
+        src/beast/extras/beast/unit_test/recorder.hpp
+        src/beast/extras/beast/unit_test/reporter.hpp
+        src/beast/extras/beast/unit_test/results.hpp
+        src/beast/extras/beast/unit_test/runner.hpp
+        src/beast/extras/beast/unit_test/suite.hpp
+        src/beast/extras/beast/unit_test/suite_info.hpp
+        src/beast/extras/beast/unit_test/suite_list.hpp
+        src/beast/extras/beast/unit_test/thread.hpp
+      DESTINATION include/beast/unit_test)
+    install (
+      FILES
+        src/beast/extras/beast/unit_test/detail/const_container.hpp
+      DESTINATION include/beast/unit_test/detail)
+endif () #tests
 #[===================================================================[
    rippled executable
 #]===================================================================]
@@ -652,11 +653,13 @@ target_sources (rippled PRIVATE
   src/ripple/shamap/impl/SHAMapNodeID.cpp
   src/ripple/shamap/impl/SHAMapSync.cpp
   src/ripple/shamap/impl/SHAMapTreeNode.cpp
-  src/ripple/shamap/impl/ShardFamily.cpp
+  src/ripple/shamap/impl/ShardFamily.cpp)
   #[===============================[
      test sources:
        subdir: app
   #]===============================]
+if (tests)
+target_sources (rippled PRIVATE
   src/test/app/AccountDelete_test.cpp
   src/test/app/AccountTxPaging_test.cpp
   src/test/app/AmendmentTable_test.cpp
@@ -962,6 +965,7 @@ target_sources (rippled PRIVATE
        subdir: unit_test
   #]===============================]
   src/test/unit_test/multi_runner.cpp)
+endif () #tests
 target_link_libraries (rippled
   Ripple::boost
   Ripple::opts
@@ -981,9 +985,11 @@ endif ()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
   # any files that don't play well with unity should be added here
+  if (tests)
   set_source_files_properties(
     # these two seem to produce conflicts in beast teardown template methods
     src/test/rpc/ValidatorRPC_test.cpp
     src/test/rpc/ShardArchiveHandler_test.cpp
     PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  endif () #tests
 endif ()

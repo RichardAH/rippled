@@ -1,7 +1,7 @@
 #[===================================================================[
    docs target (optional)
 #]===================================================================]
-
+if (tests)
 find_package (Doxygen)
 if (NOT TARGET Doxygen::doxygen)
   message (STATUS "doxygen executable not found -- skipping docs target")
@@ -76,3 +76,4 @@ add_custom_command (
 add_custom_target (docs
   DEPENDS "${doxygen_index_file}"
   SOURCES "${dependencies}")
+endif ()
