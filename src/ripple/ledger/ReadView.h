@@ -63,8 +63,11 @@ struct Fees
         the reserve increment times the number of increments.
     */
     XRPAmount
-    accountReserve(std::size_t ownerCount) const
+    accountReserve(std::size_t ownerCount, bool liteAccount = false) const
     {
+        if (liteAccount && ownerCount == 0)
+            return XRPAmount{increment.drops()/5};
+
         return reserve + ownerCount * increment;
     }
 

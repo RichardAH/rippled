@@ -486,6 +486,7 @@ extern SF_ACCOUNT const sfAuthorize;
 extern SF_ACCOUNT const sfUnauthorize;
 extern SF_ACCOUNT const sfTarget;
 extern SF_ACCOUNT const sfRegularKey;
+extern SF_ACCOUNT const sfSponsor;
 
 // path set
 extern SField const sfPaths;

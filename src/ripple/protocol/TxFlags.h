@@ -71,6 +71,9 @@ const std::uint32_t asfNoFreeze = 6;
 const std::uint32_t asfGlobalFreeze = 7;
 const std::uint32_t asfDefaultRipple = 8;
 const std::uint32_t asfDepositAuth = 9;
+const std::uint32_t asfLiteAccount = 10;
+const std::uint32_t asfSponsored = 11;
+const std::uint32_t asfNotAnIssuer = 12;
 
 // OfferCreate flags:
 const std::uint32_t tfPassive = 0x00010000;
@@ -84,8 +87,9 @@ const std::uint32_t tfOfferCreateMask =
 const std::uint32_t tfNoRippleDirect = 0x00010000;
 const std::uint32_t tfPartialPayment = 0x00020000;
 const std::uint32_t tfLimitQuality = 0x00040000;
+const std::uint32_t tfSponsor = 0x00080000;
 const std::uint32_t tfPaymentMask =
-    ~(tfUniversal | tfPartialPayment | tfLimitQuality | tfNoRippleDirect);
+    ~(tfUniversal | tfPartialPayment | tfLimitQuality | tfNoRippleDirect | tfSponsor);
 
 // TrustSet flags:
 const std::uint32_t tfSetfAuth = 0x00010000;

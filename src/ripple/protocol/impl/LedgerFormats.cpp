@@ -54,6 +54,7 @@ LedgerFormats::LedgerFormats()
             {sfDomain, soeOPTIONAL},
             {sfTickSize, soeOPTIONAL},
             {sfTicketCount, soeOPTIONAL},
+            {sfSponsor, soeOPTIONAL}
         },
         commonFields);
 

@@ -233,8 +233,9 @@ CONSTRUCT_TYPED_SFIELD(sfDestination,           "Destination",          ACCOUNT,
 CONSTRUCT_TYPED_SFIELD(sfIssuer,                "Issuer",               ACCOUNT,    4);
 CONSTRUCT_TYPED_SFIELD(sfAuthorize,             "Authorize",            ACCOUNT,    5);
 CONSTRUCT_TYPED_SFIELD(sfUnauthorize,           "Unauthorize",          ACCOUNT,    6);
-//                                                                                  7 is currently unused
+CONSTRUCT_TYPED_SFIELD(sfSponsor,               "Sponsor",              ACCOUNT,    7);
 CONSTRUCT_TYPED_SFIELD(sfRegularKey,            "RegularKey",           ACCOUNT,    8);
+
 
 // vector of 256-bit
 CONSTRUCT_TYPED_SFIELD(sfIndexes,               "Indexes",              VECTOR256,  1, SField::sMD_Never);

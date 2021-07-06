@@ -149,6 +149,20 @@ invoke_preclaim(PreclaimContext const& ctx)
     // If the transactor requires a valid account and the transaction doesn't
     // list one, preflight will have already a flagged a failure.
     auto const id = ctx.tx.getAccountID(sfAccount);
+    
+    // if LiteAccount amendment is enabled then we allow-list transaction types here
+    if (ctx.view.rules().enabled(featureLiteAccounts))
+    {
+        auto const sleAcc = ctx.view.read(keylet::account(id));
+        if (sleAcc->getFlags() & lsfLiteAccount)
+        {
+            auto tt = ctx.tx[sfTransactionType];
+            if (tt != ttACCOUNT_SET &&
+                tt != ttPAYMENT &&
+                tt != ttACCOUNT_DELETE)
+                return tecNO_PERMISSION;
+        }
+    }
 
     if (id != beast::zero)
     {

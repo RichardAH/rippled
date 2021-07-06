@@ -113,6 +113,10 @@ enum LedgerSpecificFlags {
         0x00800000,               // True, trust lines allow rippling by default
     lsfDepositAuth = 0x01000000,  // True, all deposits require authorization
 
+    lsfLiteAccount = 0x02000000,    // True, this account is a lite account
+    lsfSponsored   = 0x04000000,    // True, this account is a sponsored lite account
+    lsfNotAnIssuer = 0x08000000,    // True, this account cannot be used as an issuer in setting a trustline
+
     // ltOFFER
     lsfPassive = 0x00010000,
     lsfSell = 0x00020000,  // True, offer was placed as a sell.

@@ -242,8 +242,22 @@ Payment::preclaim(PreclaimContext const& ctx)
             // transaction would succeed.
             return telNO_DST_PARTIAL;
         }
-        else if (saDstAmount < STAmount(ctx.view.fees().accountReserve(0)))
+        else if (saDstAmount < STAmount(ctx.view.fees().accountReserve(0)) ||
+                /* if the LiteAccounts amendment is enabled then a payment with 1/5th
+                 * of an object reserve may create a new account */
+                (ctx.view.rules().enabled(featureLiteAccounts) &&
+                 saDstAmount < STAmount(ctx.view.fees().accountReserve(0, true))))
         {
+           
+            // Enforce the rule that lite accounts cannot create other lite accounts
+            auto const sleSrc = ctx.view.read(keylet::account(ctx.tx[sfAccount]));
+            if (sleSrc->getFlags() & lsfLiteAccount)
+            {
+                JLOG(ctx.j.trace())
+                    << "Lite accounts cannot create other lite accounts";
+                return tecNO_PERMISSION;
+            }    
+
             // accountReserve is the minimum amount that an account can have.
             // Reserve is not scaled by load.
             JLOG(ctx.j.trace())
@@ -331,6 +345,11 @@ Payment::doApply()
     // Open a ledger for editing.
     auto const k = keylet::account(uDstAccountID);
     SLE::pointer sleDst = view().peek(k);
+    
+    auto const sleSrc = view().peek(keylet::account(account_));
+    if (!sleSrc)
+        return tefINTERNAL;
+
 
     if (!sleDst)
     {
@@ -342,6 +361,37 @@ Payment::doApply()
         sleDst = std::make_shared<SLE>(k);
         sleDst->setAccountID(sfAccount, uDstAccountID);
         sleDst->setFieldU32(sfSequence, seqno);
+      
+        // Special account creation rules for lite accounts amendment 
+        if (view().rules().enabled(featureLiteAccounts) && 
+            saDstAmount < STAmount(view().fees().accountReserve(0)))
+        {
+            printf("PATH" "A\n");
+            if (saDstAmount < STAmount(view().fees().accountReserve(0, true)))
+                return tecNO_DST_INSUF_XRP;
+
+            printf("PATH" "B\n");
+            // add the sponsor (if flagged)
+            if (uTxFlags & tfSponsor)
+            {
+                printf("PATH" "C\n");
+
+                // disallow lite accounts from sponsoring other accounts
+                // we need this apply-time check in case an account downgraded since preflight
+                if (sleSrc->getFlags() & lsfLiteAccount)
+                    return tecNO_PERMISSION;
+
+                printf("PATH" "D\n");
+                sleDst->setAccountID(sfSponsor, account_);
+                sleDst->setFlag(lsfSponsored);
+                printf("PATH" "E\n");
+            }
+
+            printf("PATH" "F\n");
+            // and add the liteaccount flag
+            sleDst->setFlag(lsfLiteAccount);
+        }
+        printf("PATH" "G\n");
 
         view().insert(sleDst);
     }
@@ -438,10 +488,6 @@ Payment::doApply()
     assert(saDstAmount.native());
 
     // Direct XRP payment.
-
-    auto const sleSrc = view().peek(keylet::account(account_));
-    if (!sleSrc)
-        return tefINTERNAL;
 
     // uOwnerCount is the number of entries in this ledger for this
     // account that require a reserve.

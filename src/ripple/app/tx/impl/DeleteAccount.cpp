@@ -177,6 +177,46 @@ DeleteAccount::preclaim(PreclaimContext const& ctx)
     if (!sleAccount)
         return terNO_ACCOUNT;
 
+    // Check whether this is a lite account and this txn was signed by its sponsor
+    if (ctx.view.rules().enabled(featureLiteAccounts) &&
+        (sleAccount->getFlags() & lsfSponsored))
+    {
+        auto const pkSigner = ctx.tx.getSigningPubKey();
+        if (!publicKeyType(makeSlice(pkSigner)))
+        {
+            JLOG(ctx.j.trace())
+                << "liteAccount D: signing public key type is unknown";
+            return tefBAD_AUTH;
+        }
+        AccountID sponsor = sleAccount->getAccountID(sfSponsor); 
+        auto const idSigner = calcAccountID(PublicKey(makeSlice(pkSigner)));
+        if (idSigner == sponsor)
+        {
+            // the condition under which the sponsor may sign an account delete on behalf
+            // of the lite account is that 1 million ledgers have passed since the account made a txn
+            int64_t lls = sleAccount->getFieldU32(sfPreviousTxnLgrSeq);
+            int64_t cls = ctx.view.seq();
+            if (cls - lls >= 1'000'000)
+            {
+                // pass
+            }
+            else
+            {
+                // can't delete until 1 million ledgers without use
+                return tecNO_PERMISSION;
+            }
+        }
+        else
+        {
+            // The owner of the lite account is also limited when the account is sponsored:
+            // they can only specify the sponsor as the destination. If they wish to specify another
+            // they must first upgrade the lite account to release the sponsor's reserve back to the
+            // sponsor.
+            if (dst != sponsor)
+                return tecHAS_OBLIGATIONS;
+        }
+    }
+
     // We don't allow an account to be deleted if its sequence number
     // is within 256 of the current ledger.  This prevents replay of old
     // transactions if this account is resurrected after it is deleted.
@@ -248,11 +288,52 @@ DeleteAccount::doApply()
     auto src = view().peek(keylet::account(account_));
     assert(src);
 
-    auto dst = view().peek(keylet::account(ctx_.tx[sfDestination]));
+    AccountID destAccount = ctx_.tx[sfDestination];
+    auto dst = view().peek(keylet::account(destAccount));
     assert(dst);
 
     if (!src || !dst)
         return tefBAD_LEDGER;
+
+    // Check whether this is a lite account and this txn was signed by its sponsor
+    if (view().rules().enabled(featureLiteAccounts) &&
+        (src->getFlags() & lsfSponsored))
+    {
+        auto const pkSigner = ctx_.tx.getSigningPubKey();
+        if (!publicKeyType(makeSlice(pkSigner)))
+        {
+            JLOG(j_.trace())
+                << "liteAccount D: signing public key type is unknown";
+            return tefBAD_AUTH;
+        }
+        AccountID sponsor = src->getAccountID(sfSponsor); 
+        auto const idSigner = calcAccountID(PublicKey(makeSlice(pkSigner)));
+        if (idSigner == sponsor)
+        {
+            // the condition under which the sponsor may sign an account delete on behalf
+            // of the lite account is that 1 million ledgers have passed since the account made a txn
+            int64_t lls = src->getFieldU32(sfPreviousTxnLgrSeq);
+            int64_t cls = view().seq();
+            if (cls - lls >= 1'000'000)
+            {
+                // pass
+            }
+            else
+            {
+                // can't delete until 1 million ledgers without use
+                return tecNO_PERMISSION;
+            }
+        }
+        else
+        {
+            // The owner of the lite account is also limited when the account is sponsored:
+            // they can only specify the sponsor as the destination. If they wish to specify another
+            // they must first upgrade the lite account to release the sponsor's reserve back to the
+            // sponsor.
+            if (destAccount != sponsor)
+                return tecHAS_OBLIGATIONS;
+        }
+    }
 
     // Delete all of the entries in the account directory.
     Keylet const ownerDirKeylet{keylet::ownerDir(account_)};

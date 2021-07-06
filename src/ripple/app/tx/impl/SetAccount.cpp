@@ -173,6 +173,18 @@ SetAccount::preflight(PreflightContext const& ctx)
         return telBAD_DOMAIN;
     }
 
+    // sanity check lite account flags
+    if (ctx.rules.enabled(featureLiteAccounts))
+    {
+        // the only way to become a sponsored lite account is via account creation
+        // we also don't want to allow setting and clearing at the same time
+        if (uSetFlag == asfSponsored ||
+            (uSetFlag == asfLiteAccount && uClearFlag != 0) ||
+            (uClearFlag == asfSponsored && uSetFlag != 0) ||
+            (uClearFlag == asfLiteAccount && uSetFlag != 0))
+            return temINVALID_FLAG;
+    }
+
     return preflight2(ctx);
 }
 
@@ -191,6 +203,8 @@ SetAccount::preclaim(PreclaimContext const& ctx)
 
     std::uint32_t const uSetFlag = ctx.tx.getFieldU32(sfSetFlag);
 
+    std::uint32_t const uClearFlag = ctx.tx.getFieldU32(sfClearFlag);
+
     // legacy AccountSet flags
     bool bSetRequireAuth =
         (uTxFlags & tfRequireAuth) || (uSetFlag == asfRequireAuth);
@@ -206,6 +220,21 @@ SetAccount::preclaim(PreclaimContext const& ctx)
             return (ctx.flags & tapRETRY) ? TER{terOWNERS} : TER{tecOWNERS};
         }
     }
+
+    // Ensure lite account flags are only being set when the amendment is enabled
+    if (ctx.view.rules().enabled(featureLiteAccounts))
+    {
+        // these are only soft failures because for all we know the ledger might change on apply
+        if ((uClearFlag == asfLiteAccount && !(uFlagsIn & lsfLiteAccount)) ||
+            (uClearFlag == asfSponsored && !(sle->isFieldPresent(sfSponsor))))
+            return tecNO_ENTRY;
+
+        if (uSetFlag == asfLiteAccount && sle->getFieldU32(sfOwnerCount) > 0)
+            return tecOWNERS;
+    }
+    else if (uClearFlag == asfLiteAccount || uSetFlag == asfLiteAccount ||
+             uClearFlag == asfSponsored)
+       return temDISABLED; 
 
     return tesSUCCESS;
 }
@@ -513,6 +542,139 @@ SetAccount::doApply()
         {
             JLOG(j_.trace()) << "set tick size";
             sle->setFieldU8(sfTickSize, uTickSize);
+        }
+    }
+
+    //
+    // Lite accounts: upgrade and downgrade paths via accountset
+    //
+    if (view().rules().enabled(featureLiteAccounts))
+    {
+
+        bool lite = uFlagsIn & lsfLiteAccount;
+        bool sponsored = uFlagsIn & lsfSponsored;
+        STAmount balance = sle->getFieldAmount(sfBalance);
+        auto ownerCount = sle->getFieldU32(sfOwnerCount);
+
+        if (!lite && sponsored)
+        {
+            // Invalid combination, only lite accounts can be sponsored accounts
+            return tecINTERNAL;
+        }
+
+        // First check who signed the transaction. The sponsor is allowed to sign an AccountSet
+        // on behalf of the sponsee, however this can only be used to remove sponsorship
+        if (sponsored)
+        {
+            auto const pkSigner = ctx_.tx.getSigningPubKey();
+            if (!publicKeyType(makeSlice(pkSigner)))
+            {
+                JLOG(j_.trace())
+                    << "liteAccount U: signing public key type is unknown";
+                return tefBAD_AUTH;
+            }
+            auto const idSigner = calcAccountID(PublicKey(makeSlice(pkSigner)));
+
+            if (idSigner == sle->getAccountID(sfSponsor))
+            {
+                if (uClearFlag == asfSponsored)
+                {
+                    // pass
+                }
+                else
+                {
+                    // block sponsor from every other type of account set txn
+                    return tecNO_PERMISSION;
+                }
+            }
+
+        }
+        
+        if (uSetFlag == asfLiteAccount)
+        {
+            // Lite Account Downgrade Path: no owned objects, no optional fields
+            if (lite)
+            {
+                JLOG(j_.trace()) << "Attempt to AccountSet asfLiteAccount on existing lite account";
+                // attempting to set asfLiteAccount on an existing lite account does nothing
+                // fall through to tesSUCCESS
+            }
+            else
+            {
+                if (ownerCount > 0 ||
+                    sle->isFieldPresent(sfAccountTxnID) ||
+                    sle->isFieldPresent(sfRegularKey) ||
+                    sle->isFieldPresent(sfEmailHash) ||
+                    sle->isFieldPresent(sfWalletLocator) ||
+                    sle->isFieldPresent(sfWalletSize) ||
+                    sle->isFieldPresent(sfMessageKey) ||
+                    sle->isFieldPresent(sfTransferRate) ||
+                    sle->isFieldPresent(sfDomain) ||
+                    sle->isFieldPresent(sfTickSize) ||
+                    sle->isFieldPresent(sfTicketCount))
+                    return tecHAS_OBLIGATIONS;
+
+                uFlagsOut |= lsfLiteAccount;
+            }
+        }
+        else if (uClearFlag == asfLiteAccount)
+        {
+            // Lite Account Upgrade 2: Become a full account
+
+            if (!lite)
+                return tecNO_ENTRY;
+
+            if (sponsored)
+                return tecHAS_OBLIGATIONS;
+
+            XRPAmount fullReserve = view().fees().accountReserve(0);
+            if (balance < fullReserve)
+                return tecINSUFFICIENT_RESERVE;
+
+            uFlagsOut &= ~lsfLiteAccount;
+        }
+        else if (uSetFlag == asfSponsored)
+        {
+            // the only way to become a sponsor of a lite account is to send payment to unfunded account
+            JLOG(j_.trace()) << "Attempt to AccountSet asfSponsored";
+            return tecCLAIM;
+        }
+        else if (uClearFlag == asfSponsored)
+        {
+            // Lite Account Upgrade 1: Removal of sponsor
+
+            if (!sponsored)
+                return tecNO_ENTRY;
+
+            auto const sponsor = 
+                view().peek(keylet::account(sle->getAccountID(sfSponsor)));
+
+            if (sponsor)
+            {
+                // check the lite account has the required reserve for the upgrade             
+                XRPAmount liteReserve = view().fees().accountReserve(0, true);
+
+                if (balance.xrp().drops() < liteReserve.drops() * 2)
+                    return tecINSUFFICIENT_RESERVE;
+
+                // mutate balances
+                STAmount sponsorBalance = sponsor->getFieldAmount(sfBalance);
+
+                balance -= liteReserve;
+                sponsorBalance += liteReserve;
+
+                sle->setFieldAmount(sfBalance, balance);
+                sponsor->setFieldAmount(sfBalance, sponsorBalance);
+            }
+            else
+                JLOG(j_.trace()) << "Lite account with populated but unfunded sfSponsor";
+            
+            // unflag    
+            uFlagsOut &= ~lsfSponsored;
+        }
+        else
+        {
+            // fall through, not an account set that has anything to do with lite accounts
         }
     }
 
