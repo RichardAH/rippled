@@ -71,6 +71,7 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="#pri-static-attribs">Static Private Attributes</a> &#124;
@@ -80,12 +81,15 @@ $(function() {
 <div class="title">ripple::base_uint&lt; Bits, Tag &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Integers of any length that is a multiple of 32-bits.  
+ <a href="classripple_1_1base__uint.html#details">More...</a></p>
 <div class="dynheader">
 Collaboration diagram for ripple::base_uint&lt; Bits, Tag &gt;:</div>
 <div class="dyncontent">
 <div class="center"><img src="classripple_1_1base__uint__coll__graph.png" border="0" usemap="#ripple_1_1base__uint_3_01Bits_00_01Tag_01_4_coll__map" alt="Collaboration graph"/></div>
 <map name="ripple_1_1base__uint_3_01Bits_00_01Tag_01_4_coll__map" id="ripple_1_1base__uint_3_01Bits_00_01Tag_01_4_coll__map">
-<area shape="rect" title=" " alt="" coords="132,213,273,255"/>
+<area shape="rect" title="Integers of any length that is a multiple of 32&#45;bits." alt="" coords="132,213,273,255"/>
 <area shape="rect" href="http://en.cppreference.com/w/cpp/container/array.html" title=" " alt="" coords="5,95,173,136"/>
 <area shape="rect" href="http://en.cppreference.com/w/cpp/types/integer.html" title=" " alt="" coords="38,5,141,32"/>
 <area shape="rect" href="http://en.cppreference.com/w/cpp/types/size_t.html" title=" " alt="" coords="197,102,285,129"/>
@@ -146,20 +150,22 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5278a66b4c638992010ed51471ca7d5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7466966dd532bb1be84c325a3b085adb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1base__uint.html#a518df824ec540c44bd33c873708f6c90">const_iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a7466966dd532bb1be84c325a3b085adb">cend</a> () const</td></tr>
 <tr class="separator:a7466966dd532bb1be84c325a3b085adb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a197684416ad8215113a21fdd6d0a5bf3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a197684416ad8215113a21fdd6d0a5bf3">base_uint</a> ()</td></tr>
-<tr class="separator:a197684416ad8215113a21fdd6d0a5bf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0a5b6abe7383c4143bf202c236f5009"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#ae0a5b6abe7383c4143bf202c236f5009">base_uint</a> (<a class="el" href="structbeast_1_1Zero.html">beast::Zero</a>)</td></tr>
-<tr class="separator:ae0a5b6abe7383c4143bf202c236f5009"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c1b6209f31523aa814be92d5e65232a"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a8c1b6209f31523aa814be92d5e65232a">base_uint</a> ()</td></tr>
+<tr class="separator:a8c1b6209f31523aa814be92d5e65232a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed8a2882ddb67a20a10740cb014a7c5a"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#aed8a2882ddb67a20a10740cb014a7c5a">base_uint</a> (<a class="el" href="structbeast_1_1Zero.html">beast::Zero</a>)</td></tr>
+<tr class="separator:aed8a2882ddb67a20a10740cb014a7c5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd79a5ddf677a8e9dce05dee5138f0ef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#acd79a5ddf677a8e9dce05dee5138f0ef">base_uint</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> b)</td></tr>
 <tr class="separator:acd79a5ddf677a8e9dce05dee5138f0ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61448eebf503a393e1852e5a70671aca"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a61448eebf503a393e1852e5a70671aca">base_uint</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a> sv) noexcept(false)</td></tr>
+<tr class="separator:a61448eebf503a393e1852e5a70671aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74b620ce5af328743bede2b84eabd41c"><td class="memTemplParams" colspan="2">template&lt;class Container , class  = std::enable_if_t&lt;            detail::is_contiguous_container&lt;Container&gt;::value &amp;&amp;            std::is_trivially_copyable&lt;typename Container::value_type&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:a74b620ce5af328743bede2b84eabd41c"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a74b620ce5af328743bede2b84eabd41c">base_uint</a> (Container const &amp;c)</td></tr>
 <tr class="separator:a74b620ce5af328743bede2b84eabd41c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d81bee7b0d79e183b476216d59f423a"><td class="memTemplParams" colspan="2">template&lt;class Container &gt; </td></tr>
 <tr class="memitem:a7d81bee7b0d79e183b476216d59f423a"><td class="memTemplItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/enable_if.html">std::enable_if_t</a>&lt; <a class="el" href="structripple_1_1detail_1_1is__contiguous__container.html">detail::is_contiguous_container</a>&lt; Container &gt;::value &amp;&amp;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/is_trivially_copyable.html">std::is_trivially_copyable</a>&lt; typename Container::value_type &gt;::value, <a class="el" href="classripple_1_1base__uint.html">base_uint</a> &amp; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a7d81bee7b0d79e183b476216d59f423a">operator=</a> (Container const &amp;c)</td></tr>
 <tr class="separator:a7d81bee7b0d79e183b476216d59f423a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cd8618ff1a55ff0216c45b1cbbb0d31"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a3cd8618ff1a55ff0216c45b1cbbb0d31">signum</a> () const</td></tr>
-<tr class="separator:a3cd8618ff1a55ff0216c45b1cbbb0d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a846cfc85f78f671c86bba3512a706f0d"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a846cfc85f78f671c86bba3512a706f0d">signum</a> () const</td></tr>
+<tr class="separator:a846cfc85f78f671c86bba3512a706f0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1829cbc008e9d1c93c6abd1cbe126bb1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a1829cbc008e9d1c93c6abd1cbe126bb1">operator!</a> () const</td></tr>
 <tr class="separator:a1829cbc008e9d1c93c6abd1cbe126bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad2ec0db359f3f38ec18f6a33f6c0327"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classripple_1_1base__uint.html">base_uint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#aad2ec0db359f3f38ec18f6a33f6c0327">operator~</a> () const</td></tr>
@@ -182,16 +188,13 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4c095b1d777cdbe990d089fff6a11527"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa5a944d8d2b1e298a6c36ea26158771"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1base__uint.html">base_uint</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#aaa5a944d8d2b1e298a6c36ea26158771">operator+=</a> (const <a class="el" href="classripple_1_1base__uint.html">base_uint</a> &amp;b)</td></tr>
 <tr class="separator:aaa5a944d8d2b1e298a6c36ea26158771"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad801ed550425382affd197d3dae89e7d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#ad801ed550425382affd197d3dae89e7d">SetHexExact</a> (const char *psz)</td></tr>
-<tr class="memdesc:ad801ed550425382affd197d3dae89e7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a hex string into a <a class="el" href="classripple_1_1base__uint.html">base_uint</a> The string must contain exactly bytes * 2 hex characters and must not have any leading or trailing whitespace.  <a href="classripple_1_1base__uint.html#ad801ed550425382affd197d3dae89e7d">More...</a><br /></td></tr>
-<tr class="separator:ad801ed550425382affd197d3dae89e7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4e88c771af37069b5cd6490ae010d52"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#aa4e88c771af37069b5cd6490ae010d52">SetHex</a> (const char *psz, bool bStrict=false)</td></tr>
-<tr class="memdesc:aa4e88c771af37069b5cd6490ae010d52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a hex string into a <a class="el" href="classripple_1_1base__uint.html">base_uint</a> The input can be:  <a href="classripple_1_1base__uint.html#aa4e88c771af37069b5cd6490ae010d52">More...</a><br /></td></tr>
-<tr class="separator:aa4e88c771af37069b5cd6490ae010d52"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6eeb73551426f9cea5bc1361802cbc78"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a6eeb73551426f9cea5bc1361802cbc78">SetHex</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;str, bool bStrict=false)</td></tr>
-<tr class="separator:a6eeb73551426f9cea5bc1361802cbc78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9573619ffaf722dca3dc1a3ae33ad661"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a9573619ffaf722dca3dc1a3ae33ad661">SetHexExact</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;str)</td></tr>
-<tr class="separator:a9573619ffaf722dca3dc1a3ae33ad661"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a698d3fd0c0f0155995c87d2f48ac90d5"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a698d3fd0c0f0155995c87d2f48ac90d5">parseHex</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a> sv)</td></tr>
+<tr class="memdesc:a698d3fd0c0f0155995c87d2f48ac90d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a hex string into a <a class="el" href="classripple_1_1base__uint.html" title="Integers of any length that is a multiple of 32-bits.">base_uint</a>.  <a href="classripple_1_1base__uint.html#a698d3fd0c0f0155995c87d2f48ac90d5">More...</a><br /></td></tr>
+<tr class="separator:a698d3fd0c0f0155995c87d2f48ac90d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a836931fab502227670718739b78ec858"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a836931fab502227670718739b78ec858">parseHex</a> (const char *str)</td></tr>
+<tr class="separator:a836931fab502227670718739b78ec858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fe41b39bc05c5a31ec93dcd5b1846a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a5fe41b39bc05c5a31ec93dcd5b1846a4">parseHex</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;str)</td></tr>
+<tr class="separator:a5fe41b39bc05c5a31ec93dcd5b1846a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aebd7a2fb95f528e0e6cde31da52ab457"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1base__uint.html">base_uint</a>&lt; Bits, Tag &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#aebd7a2fb95f528e0e6cde31da52ab457">operator=</a> (<a class="el" href="structbeast_1_1Zero.html">beast::Zero</a>)</td></tr>
 <tr class="separator:aebd7a2fb95f528e0e6cde31da52ab457"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fd7dba1ad932f4c1246c9a090c145e5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a6fd7dba1ad932f4c1246c9a090c145e5">isZero</a> () const</td></tr>
@@ -213,10 +216,22 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:a4b9e8d36a37963d48be8f081d99257bf"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a4b9e8d36a37963d48be8f081d99257bf">bytes</a> = Bits / 8</td></tr>
 <tr class="separator:a4b9e8d36a37963d48be8f081d99257bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-types"></a>
+Private Types</h2></td></tr>
+<tr class="memitem:a0b8a12d34f2b89afcba928b6f4dbbe3d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3d">ParseResult</a> { <a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3dadf8fede7ff71608e24a5576326e41c75">ParseResult::okay</a>, 
+<a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3dad5d123ea29c3a4ac8f5eef5d38360870">ParseResult::badLength</a>, 
+<a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3dab70199a01fd9cc72d65fd240b913139d">ParseResult::badChar</a>
+ }</td></tr>
+<tr class="separator:a0b8a12d34f2b89afcba928b6f4dbbe3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:ae7899301d35feb13501ef8dec19f201f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#ae7899301d35feb13501ef8dec19f201f">base_uint</a> (void const *<a class="el" href="classripple_1_1base__uint.html#a5342507fe2fb5ac55d578e7e98863f70">data</a>, <a class="el" href="structripple_1_1base__uint_1_1VoidHelper.html">VoidHelper</a>)</td></tr>
 <tr class="separator:ae7899301d35feb13501ef8dec19f201f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6e9f5022beba4782e03668163f785bf"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3d">ParseResult</a>, decltype(<a class="el" href="classripple_1_1base__uint.html#aefd5d1e621c3be3029e54d53144c9982">data_</a>)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#aa6e9f5022beba4782e03668163f785bf">parseFromStringView</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a> sv) noexcept</td></tr>
+<tr class="separator:aa6e9f5022beba4782e03668163f785bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d44332d257cfd3f99d23cfc7212217e"><td class="memItemLeft" align="right" valign="top">constexpr decltype(<a class="el" href="classripple_1_1base__uint.html#aefd5d1e621c3be3029e54d53144c9982">data_</a>)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1base__uint.html#a4d44332d257cfd3f99d23cfc7212217e">parseFromStringViewThrows</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a> sv) noexcept(false)</td></tr>
+<tr class="separator:a4d44332d257cfd3f99d23cfc7212217e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -238,8 +253,17 @@ Friends</h2></td></tr>
 <div class="textblock"><h3>template&lt;std::size_t Bits, class Tag = void&gt;<br />
 class ripple::base_uint&lt; Bits, Tag &gt;</h3>
 
+<p>Integers of any length that is a multiple of 32-bits. </p>
+<dl class="section note"><dt>Note</dt><dd>This class stores its values internally in big-endian form and that internal representation is part of the binary protocol of the XRP <a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> and cannot be changed arbitrarily without causing breakage.</dd></dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Bits</td><td>The number of bits this integer should have; must be at least 64 and a multiple of 32. </td></tr>
+    <tr><td class="paramname">Tag</td><td>An arbitrary type that functions as a tag and allows the instantiation of "distinct" types that the same number of bits. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00063">63</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00074">74</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a78c5e4763a7826ed0dce551aa1b45659"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a78c5e4763a7826ed0dce551aa1b45659">&#9670;&nbsp;</a></span>size_type</h2>
@@ -255,7 +279,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00089">89</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00100">100</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -273,7 +297,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00090">90</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00101">101</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -291,7 +315,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00091">91</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00102">102</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -309,7 +333,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00092">92</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00103">103</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -327,7 +351,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00093">93</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00104">104</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -345,7 +369,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00094">94</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00105">105</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -363,7 +387,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00095">95</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00106">106</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -381,7 +405,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00096">96</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00107">107</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -399,7 +423,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00097">97</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00108">108</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -417,7 +441,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00098">98</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00109">109</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -435,7 +459,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00099">99</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00110">110</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -453,7 +477,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00100">100</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00111">111</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -474,13 +498,45 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 <p>Value hashing function. </p>
 <p>The seed prevents crafted inputs from causing degenerate parent containers. </p>
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00148">148</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00159">159</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a0b8a12d34f2b89afcba928b6f4dbbe3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b8a12d34f2b89afcba928b6f4dbbe3d">&#9670;&nbsp;</a></span>ParseResult</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3d">ripple::base_uint::ParseResult</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0b8a12d34f2b89afcba928b6f4dbbe3dadf8fede7ff71608e24a5576326e41c75"></a>okay&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0b8a12d34f2b89afcba928b6f4dbbe3dad5d123ea29c3a4ac8f5eef5d38360870"></a>badLength&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0b8a12d34f2b89afcba928b6f4dbbe3dab70199a01fd9cc72d65fd240b913139d"></a>badChar&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00182">182</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae7899301d35feb13501ef8dec19f201f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae7899301d35feb13501ef8dec19f201f">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[1/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7899301d35feb13501ef8dec19f201f">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[1/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -515,55 +571,71 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00165">165</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00176">176</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
-<a id="a197684416ad8215113a21fdd6d0a5bf3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a197684416ad8215113a21fdd6d0a5bf3">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[2/5]</span></h2>
+<a id="a8c1b6209f31523aa814be92d5e65232a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c1b6209f31523aa814be92d5e65232a">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[2/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::<a class="el" href="classripple_1_1base__uint.html">base_uint</a> </td>
+          <td class="memname">constexpr <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::<a class="el" href="classripple_1_1base__uint.html">base_uint</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00171">171</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00263">263</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
-<a id="ae0a5b6abe7383c4143bf202c236f5009"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae0a5b6abe7383c4143bf202c236f5009">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[3/5]</span></h2>
+<a id="aed8a2882ddb67a20a10740cb014a7c5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed8a2882ddb67a20a10740cb014a7c5a">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[3/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::<a class="el" href="classripple_1_1base__uint.html">base_uint</a> </td>
+          <td class="memname">constexpr <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::<a class="el" href="classripple_1_1base__uint.html">base_uint</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structbeast_1_1Zero.html">beast::Zero</a>&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00176">176</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00267">267</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
 <a id="acd79a5ddf677a8e9dce05dee5138f0ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acd79a5ddf677a8e9dce05dee5138f0ef">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[4/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#acd79a5ddf677a8e9dce05dee5138f0ef">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -588,12 +660,42 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00181">181</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00271">271</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+
+</div>
+</div>
+<a id="a61448eebf503a393e1852e5a70671aca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61448eebf503a393e1852e5a70671aca">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::<a class="el" href="classripple_1_1base__uint.html">base_uint</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td>
+          <td class="paramname"><em>sv</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00279">279</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
 <a id="a74b620ce5af328743bede2b84eabd41c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a74b620ce5af328743bede2b84eabd41c">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[5/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a74b620ce5af328743bede2b84eabd41c">&#9670;&nbsp;</a></span>base_uint() <span class="overload">[6/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -620,7 +722,7 @@ template&lt;class Container , class  = std::enable_if_t&lt;            detail::i
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00191">191</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00289">289</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -642,7 +744,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00103">103</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00114">114</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -663,7 +765,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00108">108</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00119">119</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -684,7 +786,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00114">114</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00125">125</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -705,7 +807,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00119">119</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00130">130</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -726,7 +828,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00124">124</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00135">135</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -747,7 +849,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00129">129</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00140">140</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -768,7 +870,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00134">134</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00145">145</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -789,7 +891,67 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00139">139</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00150">150</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+
+</div>
+</div>
+<a id="aa6e9f5022beba4782e03668163f785bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6e9f5022beba4782e03668163f785bf">&#9670;&nbsp;</a></span>parseFromStringView()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt;<a class="el" href="classripple_1_1base__uint.html#a0b8a12d34f2b89afcba928b6f4dbbe3d">ParseResult</a>, decltype(<a class="el" href="classripple_1_1base__uint.html#aefd5d1e621c3be3029e54d53144c9982">data_</a>)&gt; <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::parseFromStringView </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td>
+          <td class="paramname"><em>sv</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span><span class="mlabel">private</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00189">189</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+
+</div>
+</div>
+<a id="a4d44332d257cfd3f99d23cfc7212217e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d44332d257cfd3f99d23cfc7212217e">&#9670;&nbsp;</a></span>parseFromStringViewThrows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr decltype(<a class="el" href="classripple_1_1base__uint.html#aefd5d1e621c3be3029e54d53144c9982">data_</a>) <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::parseFromStringViewThrows </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td>
+          <td class="paramname"><em>sv</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span><span class="mlabel">private</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00250">250</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -813,7 +975,7 @@ template&lt;class Container &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00202">202</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00300">300</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -843,28 +1005,36 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00213">213</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00311">311</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
-<a id="a3cd8618ff1a55ff0216c45b1cbbb0d31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3cd8618ff1a55ff0216c45b1cbbb0d31">&#9670;&nbsp;</a></span>signum()</h2>
+<a id="a846cfc85f78f671c86bba3512a706f0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a846cfc85f78f671c86bba3512a706f0d">&#9670;&nbsp;</a></span>signum()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::signum </td>
+          <td class="memname">constexpr int <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::signum </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00219">219</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00317">317</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -885,7 +1055,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00229">229</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00327">327</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -906,7 +1076,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00235">235</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00333">333</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -928,7 +1098,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00246">246</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00344">344</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -950,7 +1120,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00262">262</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00360">360</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -972,7 +1142,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00271">271</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00369">369</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -994,7 +1164,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00280">280</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00378">378</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1015,7 +1185,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00289">289</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00387">387</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1037,7 +1207,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00304">304</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00402">402</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1058,7 +1228,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00314">314</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00412">412</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1080,7 +1250,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00330">330</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00428">428</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1102,36 +1272,82 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00340">340</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00438">438</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
-<a id="ad801ed550425382affd197d3dae89e7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad801ed550425382affd197d3dae89e7d">&#9670;&nbsp;</a></span>SetHexExact() <span class="overload">[1/2]</span></h2>
+<a id="a698d3fd0c0f0155995c87d2f48ac90d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a698d3fd0c0f0155995c87d2f48ac90d5">&#9670;&nbsp;</a></span>parseHex() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::SetHexExact </td>
+          <td class="memname">constexpr bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::parseHex </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td>
+          <td class="paramname"><em>sv</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parse a hex string into a <a class="el" href="classripple_1_1base__uint.html" title="Integers of any length that is a multiple of 32-bits.">base_uint</a>. </p>
+<p>The input must be precisely <code>2 * bytes</code> hexadecimal characters long, with one exception: the value '0'.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sv</td><td>A null-terminated string of hexadecimal characters </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the input was parsed properly; false otherwise. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00472">472</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+
+</div>
+</div>
+<a id="a836931fab502227670718739b78ec858"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a836931fab502227670718739b78ec858">&#9670;&nbsp;</a></span>parseHex() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t Bits, class Tag  = void&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::parseHex </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>psz</em></td><td>)</td>
+          <td class="paramname"><em>str</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Parse a hex string into a <a class="el" href="classripple_1_1base__uint.html">base_uint</a> The string must contain exactly bytes * 2 hex characters and must not have any leading or trailing whitespace. </p>
-
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00370">370</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00483">483</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
-<a id="aa4e88c771af37069b5cd6490ae010d52"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa4e88c771af37069b5cd6490ae010d52">&#9670;&nbsp;</a></span>SetHex() <span class="overload">[1/2]</span></h2>
+<a id="a5fe41b39bc05c5a31ec93dcd5b1846a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fe41b39bc05c5a31ec93dcd5b1846a4">&#9670;&nbsp;</a></span>parseHex() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1139,79 +1355,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::SetHex </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>psz</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>bStrict</em> = <code>false</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Parse a hex string into a <a class="el" href="classripple_1_1base__uint.html">base_uint</a> The input can be: </p>
-<ul>
-<li>shorter than the full hex representation by not including leading zeroes.</li>
-<li>longer than the full hex representation in which case leading bytes are discarded.</li>
-</ul>
-<p>When finished parsing, the string must be fully consumed with only a null terminator remaining.</p>
-<p>When bStrict is false, the parsing is done in non-strict mode, and, if present, leading whitespace and the 0x prefix will be skipped. </p>
-
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00406">406</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
-
-</div>
-</div>
-<a id="a6eeb73551426f9cea5bc1361802cbc78"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6eeb73551426f9cea5bc1361802cbc78">&#9670;&nbsp;</a></span>SetHex() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;std::size_t Bits, class Tag  = void&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::SetHex </td>
-          <td>(</td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
-          <td class="paramname"><em>str</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>bStrict</em> = <code>false</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00450">450</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
-
-</div>
-</div>
-<a id="a9573619ffaf722dca3dc1a3ae33ad661"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9573619ffaf722dca3dc1a3ae33ad661">&#9670;&nbsp;</a></span>SetHexExact() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;std::size_t Bits, class Tag  = void&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::SetHexExact </td>
+          <td class="memname">bool <a class="el" href="classripple_1_1base__uint.html">ripple::base_uint</a>&lt; Bits, Tag &gt;::parseHex </td>
           <td>(</td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
           <td class="paramname"><em>str</em></td><td>)</td>
@@ -1220,7 +1364,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00456">456</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00489">489</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1249,7 +1393,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00462">462</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00495">495</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1271,7 +1415,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00467">467</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00500">500</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1292,7 +1436,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00475">475</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00508">508</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1313,7 +1457,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00480">480</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00513">513</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1334,7 +1478,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00485">485</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00518">518</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1377,7 +1521,7 @@ template&lt;class Hasher &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00359">359</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00457">457</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1404,7 +1548,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00073">73</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00084">84</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1430,7 +1574,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00078">78</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00089">89</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
@@ -1456,7 +1600,7 @@ template&lt;std::size_t Bits, class Tag  = void&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00086">86</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="base__uint_8h_source.html#l00097">97</a> of file <a class="el" href="base__uint_8h_source.html">base_uint.h</a>.</p>
 
 </div>
 </div>
