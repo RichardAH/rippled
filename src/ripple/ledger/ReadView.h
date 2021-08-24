@@ -65,10 +65,14 @@ struct Fees
     XRPAmount
     accountReserve(std::size_t ownerCount, bool liteAccount = false) const
     {
-        if (liteAccount && ownerCount == 0)
-            return XRPAmount{increment.drops()/5};
+        XRPAmount amount = 
+            (liteAccount && ownerCount == 0 
+            ? XRPAmount { increment.drops()/5 }
+            : reserve + ownerCount * increment);
 
-        return reserve + ownerCount * increment;
+        printf("accountReserve(%d, %s) = %d\n", ownerCount, (liteAccount ? "true":"false"), amount); 
+              
+        return amount; 
     }
 
     XRPAmount

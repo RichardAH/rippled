@@ -219,8 +219,21 @@ Payment::preclaim(PreclaimContext const& ctx)
     auto const k = keylet::account(uDstAccountID);
     auto const sleDst = ctx.view.read(k);
 
+    printf("featureLiteAccounts: %s\n", (ctx.view.rules().enabled(featureLiteAccounts) ? "enabled" : "disabled"));
+
     if (!sleDst)
     {
+        if (ctx.view.rules().enabled(featureLiteAccounts))
+        {
+            // Enforce the rule that lite accounts cannot create other lite accounts
+            auto const sleSrc = ctx.view.read(keylet::account(ctx.tx[sfAccount]));
+            if (sleSrc->getFlags() & lsfLiteAccount)
+            {
+                JLOG(ctx.j.trace())
+                    << "Lite accounts cannot create other lite accounts";
+                return tecNO_PERMISSION;
+            }    
+        }
         // Destination account does not exist.
         if (!saDstAmount.native())
         {
@@ -242,22 +255,14 @@ Payment::preclaim(PreclaimContext const& ctx)
             // transaction would succeed.
             return telNO_DST_PARTIAL;
         }
-        else if (saDstAmount < STAmount(ctx.view.fees().accountReserve(0)) ||
+        else if (saDstAmount < STAmount(ctx.view.fees().accountReserve(0)) &&
                 /* if the LiteAccounts amendment is enabled then a payment with 1/5th
                  * of an object reserve may create a new account */
-                (ctx.view.rules().enabled(featureLiteAccounts) &&
-                 saDstAmount < STAmount(ctx.view.fees().accountReserve(0, true))))
+                 !(ctx.view.rules().enabled(featureLiteAccounts) &&
+                 saDstAmount >= STAmount(ctx.view.fees().accountReserve(0, true))))
         {
-           
-            // Enforce the rule that lite accounts cannot create other lite accounts
-            auto const sleSrc = ctx.view.read(keylet::account(ctx.tx[sfAccount]));
-            if (sleSrc->getFlags() & lsfLiteAccount)
-            {
-                JLOG(ctx.j.trace())
-                    << "Lite accounts cannot create other lite accounts";
-                return tecNO_PERMISSION;
-            }    
-
+          
+           printf("PATH Z\n"); 
             // accountReserve is the minimum amount that an account can have.
             // Reserve is not scaled by load.
             JLOG(ctx.j.trace())

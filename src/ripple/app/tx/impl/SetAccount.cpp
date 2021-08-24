@@ -191,20 +191,31 @@ SetAccount::preflight(PreflightContext const& ctx)
 TER
 SetAccount::preclaim(PreclaimContext const& ctx)
 {
+    printf("P1\n");
     auto const id = ctx.tx[sfAccount];
 
+    printf("P2\n");
     std::uint32_t const uTxFlags = ctx.tx.getFlags();
 
+    printf("P3\n");
     auto const sle = ctx.view.read(keylet::account(id));
+
+    printf("P4\n");
     if (!sle)
         return terNO_ACCOUNT;
 
+    printf("P5\n");
+    fprintf(stderr, 
+            "SetAccount::preclaim; sle->sfFlags present: %s\n", (sle->isFieldPresent(sfFlags) ? "true":"false"));
     std::uint32_t const uFlagsIn = sle->getFieldU32(sfFlags);
 
+    printf("P6\n");
     std::uint32_t const uSetFlag = ctx.tx.getFieldU32(sfSetFlag);
 
+    printf("P7\n");
     std::uint32_t const uClearFlag = ctx.tx.getFieldU32(sfClearFlag);
 
+    printf("P8\n");
     // legacy AccountSet flags
     bool bSetRequireAuth =
         (uTxFlags & tfRequireAuth) || (uSetFlag == asfRequireAuth);
@@ -221,14 +232,17 @@ SetAccount::preclaim(PreclaimContext const& ctx)
         }
     }
 
+    printf("P9\n");
     // Ensure lite account flags are only being set when the amendment is enabled
     if (ctx.view.rules().enabled(featureLiteAccounts))
     {
+        printf("P10\n");
         // these are only soft failures because for all we know the ledger might change on apply
         if ((uClearFlag == asfLiteAccount && !(uFlagsIn & lsfLiteAccount)) ||
             (uClearFlag == asfSponsored && !(sle->isFieldPresent(sfSponsor))))
             return tecNO_ENTRY;
 
+        printf("P11\n");
         if (uSetFlag == asfLiteAccount && sle->getFieldU32(sfOwnerCount) > 0)
             return tecOWNERS;
     }
@@ -236,6 +250,7 @@ SetAccount::preclaim(PreclaimContext const& ctx)
              uClearFlag == asfSponsored)
        return temDISABLED; 
 
+    printf("P12\n");
     return tesSUCCESS;
 }
 
@@ -664,7 +679,10 @@ SetAccount::doApply()
                 sponsorBalance += liteReserve;
 
                 sle->setFieldAmount(sfBalance, balance);
+                sle->makeFieldAbsent(sfSponsor);
+
                 sponsor->setFieldAmount(sfBalance, sponsorBalance);
+                view().update(sponsor);
             }
             else
                 JLOG(j_.trace()) << "Lite account with populated but unfunded sfSponsor";

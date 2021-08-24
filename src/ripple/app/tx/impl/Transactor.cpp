@@ -479,7 +479,7 @@ Transactor::checkSingleSign(PreclaimContext const& ctx)
 
     bool const isMasterDisabled = sleAccount->isFlag(lsfDisableMaster);
 
-    auto const transactionType = ctx.tx.getFieldU32(sfTransactionType);
+    auto const transactionType = ctx.tx.getTxnType();
 
     if (ctx.view.rules().enabled(fixMasterKeyAsRegularKey))
     {
