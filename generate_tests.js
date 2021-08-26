@@ -394,7 +394,12 @@ console.log(`
     })).then(setup_result=>{
         console.log("setup result:", setup_result);
         tests = {};
-        // do testcases here
+        tests_description = {};
+        const tests_updated = (testid)=>{
+            console.log(tests_description[testid])
+            console.log("===> " + (tests[testid] === true ? 'PASS' : 
+                tests[testid] === false ? 'FAIL' : tests[testid]))
+        }
 `);
 
 
@@ -406,19 +411,19 @@ function produce_cases(cases, namespace, counter = 0, should_succeed = true)
         console.log(human_readable(2, cases[x]) + ' */')
         console.log(spacer.repeat(2) + 'let test' + counter + ' = new Promise((resolve, reject)=>{');
         console.log(spacer.repeat(3) + 'const account = random_address();');
-        console.log(spacer.repeat(3) + "console.log('" + namespace + " test " + counter + ": " + cases[x] + "');");
-        console.log(spacer.repeat(3) + "console.log(`" + human_readable(1, cases[x]) + "`);")
+        console.log(spacer.repeat(3) + "tests_description[" + counter + "] = `" + namespace + " test " + counter + ": " + cases[x] + "\n" + human_readable(1, cases[x]) + "`;")
         console.log(generate_code(3, cases[x], should_succeed, 'resolve', 'reject',
             'sponsor.address', 'sponsor.seed', 'account.address', 'account.seed', 'third.address', 'third.seed'));
         console.log(spacer.repeat(2) + '});')
-        console.log(spacer.repeat(2) + 'test' + counter + '.then(result=>{tests[' + counter + '] = result;})' +
-            '.catch(e=>{tests[' + counter + ']="ERROR"; console.error(e);})');
+        console.log(spacer.repeat(2) + 'test' + counter + '.then(result=>{tests[' + counter + 
+            '] = result; tests_updated('+counter+');})' +
+            '.catch(e=>{tests[' + counter + ']="ERROR"; tests_updated(' + counter + '); console.error(e);})');
         counter++;
     }
+    return counter
 }
 
-counter = 0;
-produce_cases(positive_cases, "positive", counter, true);
+counter = produce_cases(positive_cases, "positive", 0, true);
 produce_cases(negative_cases, "negative", counter, false);
 
 
