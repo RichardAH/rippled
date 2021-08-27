@@ -154,7 +154,7 @@ invoke_preclaim(PreclaimContext const& ctx)
     if (ctx.view.rules().enabled(featureLiteAccounts))
     {
         auto const sleAcc = ctx.view.read(keylet::account(id));
-        if (sleAcc->getFlags() & lsfLiteAccount)
+        if (sleAcc && sleAcc->getFlags() & lsfLiteAccount)
         {
             auto tt = ctx.tx[sfTransactionType];
             if (tt != ttACCOUNT_SET &&

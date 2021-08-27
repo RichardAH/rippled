@@ -1,10 +1,10 @@
 
 const states = {
     'L': 'Non-existent Account',
-    'M': 'Sponsored Lite Account with < 2 * Reserve',
+    'M': 'Sponsored LiteAcc < 2 Reserve',
     'N': 'Unsponsored Lite Account',
     'O': 'Full Account',
-    'P': 'Sponsored Lite Account with >= 2 * Reserve'
+    'P': 'Sponsored LiteAcc >= 2 Reserve'
 }
 
 const transitions = {
@@ -357,13 +357,17 @@ console.log(`
 const keypairs = require("ripple-keypairs")
 const api_factory = require('ripple-lib').RippleAPI
 const api = new api_factory({server: 'ws://localhost:6005'})
-
+const wsf = require('ws')
+const ws = new wsf('ws://localhost:6005')
 function ledger_accept(n) 
 {
     if (n == undefined)
         n = 1;
     for (let i = 0; i < n; ++i)
-        api.connection._ws.send('{"command":"ledger_accept"}');
+    {
+        console.log("ledger_accept", i)
+        ws.send('{"command":"ledger_accept"}');
+    }
 };
 
 function random_address()
@@ -378,50 +382,51 @@ const genesis = {seed: 'snoPBrXtMeMyMHUVTgbuqAfg1SUTb', address: 'rHb9CJAWyB4rj9
 const sponsor = random_address();
 const third = random_address();
 
-api.connect().then(() => {
-    (new Promise((resolve, reject)=>{
+ws.on('open', ()=>{
+    api.connect().then(() => {
+        (new Promise((resolve, reject)=>{
 `);
-console.log(generate_payment(2, '', true, 'resolve','reject', 'genesis.seed', 'genesis.address', '100000000000', 'sponsor.address', ''));
+console.log(generate_payment(3, '', true, 'resolve','reject', 'genesis.seed', 'genesis.address', '100000000000', 'sponsor.address', ''));
 console.log(`
-    })).then(setup_result=>{
-        console.log("setup result:", setup_result);
-        tests = {};
-        tests_description = {};
-        const tests_updated = (testid)=>{
-            console.log(tests_description[testid])
-            console.log("===> " + (tests[testid] === true ? 'PASS' : 
-                tests[testid] === false ? 'FAIL' : tests[testid]))
-        }
+        })).then(setup_result=>{
+            console.log("setup result:", setup_result);
+            tests = {};
+            tests_description = {};
+            const tests_updated = (testid)=>{
+                console.log(tests_description[testid])
+                console.log("===> " + (tests[testid] === true ? 'PASS' : 
+                    tests[testid] === false ? 'FAIL' : tests[testid]))
+            }
 `);
 
 
-function produce_cases(cases, namespace, counter = 0, should_succeed = true)
+function produce_cases(indent_level, cases, namespace, counter = 0, should_succeed = true)
 {
     for (let x in cases)
     {
-        console.log(spacer.repeat(2) + '/* ' + namespace + ' test ' + counter + ' [' + cases[x] + ']')
-        console.log(human_readable(2, cases[x]) + ' */')
-        console.log(spacer.repeat(2) + 'let test' + counter + ' = new Promise((resolve, reject)=>{');
-        console.log(spacer.repeat(3) + 'const account = random_address();');
-        console.log(spacer.repeat(3) + "tests_description[" + counter + "] = `" + namespace + " test " + counter + ": " + cases[x] + "\n" + human_readable(1, cases[x]) + "`;")
-        console.log(generate_code(3, cases[x], should_succeed, 'resolve', 'reject',
+        console.log(spacer.repeat(indent_level) + '/* ' + namespace + ' test ' + counter + ' [' + cases[x] + ']')
+        console.log(human_readable(indent_level, cases[x]) + ' */')
+        console.log(spacer.repeat(indent_level) + 'let test' + counter + ' = new Promise((resolve, reject)=>{');
+        console.log(spacer.repeat(indent_level + 1) + 'const account = random_address();');
+        console.log(spacer.repeat(indent_level + 1) + "tests_description[" + counter + "] = `" + namespace + " test " + counter + ": " + cases[x] + "\n" + human_readable(1, cases[x]) + "`;")
+        console.log(generate_code(indent_level + 1, cases[x], should_succeed, 'resolve', 'reject',
             'sponsor.address', 'sponsor.seed', 'account.address', 'account.seed', 'third.address', 'third.seed'));
-        console.log(spacer.repeat(2) + '});')
-        console.log(spacer.repeat(2) + 'test' + counter + '.then(result=>{tests[' + counter + 
-            '] = result; tests_updated('+counter+');})' +
-            '.catch(e=>{tests[' + counter + 
+        console.log(spacer.repeat(indent_level) + '});')
+        console.log(spacer.repeat(indent_level) + 'test' + counter + '.then(' +
+            'result => {tests[' + counter + 
+            '] = result; tests_updated('+counter+');}).catch(\n' + 
+            spacer.repeat(indent_level + 1) + 'e => {tests[' + counter + 
             ']="ERROR: " + JSON.stringify(e); tests_updated(' + counter + ');})');
         counter++;
     }
     return counter
 }
 
-counter = produce_cases(positive_cases.slice(0,1), "positive", 0, true);
+counter = produce_cases(3, positive_cases.slice(0,1), "positive", 0, true);
 //produce_cases(negative_cases, "negative", counter, false);
 
 
-console.log(`
-    }).catch(e=>{throw(e);});
-`);
-console.log('}).catch(console.error);');
+console.log('       }).catch(e=>{throw(e);});');
+console.log('   }).catch(console.error);');
+console.log('})')
 
