@@ -47,7 +47,7 @@ const  transition = {
 const lsfSponsor = 0x00080000;
 const asfSponsored = 11;
 const asfLiteAccount = 10;
-
+const ledgers_before_force = 3;
 var global_error_counter = 10000;
 
 const transition_action = {
@@ -75,16 +75,18 @@ const transition_action = {
     '3': (indent_level, s, positive_test, resolve, reject,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Forced Delete by Sponsor
-        return generate_accountdelete(indent_level, s, positive_test, resolve, reject,
+        return spacer.repeat(indent_level) + 'ledger_accept(' + ledgers_before_force + ');\n' +    
+            generate_accountdelete(indent_level, s, positive_test, resolve, reject,
             sponsor_seed, account, sponsor, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
     },
     '4': (indent_level, s, positive_test, resolve, reject,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Forced Upgrade 1 by Sponsor
-        return generate_accountset(indent_level, s, positive_test, resolve, reject,
-            sponsor_seed, account, null, asfSponsored, 
-            sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
+        return spacer.repeat(indent_level) + 'ledger_accept(' + ledgers_before_force + ');\n' +
+            generate_accountset(indent_level, s, positive_test, resolve, reject,
+                sponsor_seed, account, null, asfSponsored, 
+                sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
     '5': (indent_level, s, positive_test, resolve, reject,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
@@ -134,20 +136,6 @@ function generate_code(indent_level, s, positive_test, resolve, reject,
                         sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
 {
     let out = ""
-
-    /*
-    out =  '/' + '* ' + s + JSON.stringify({
-        positive_test: positive_test,
-        resolve: resolve,
-        reject: reject,
-        sponsor: sponsor,
-        sponsor_seed: sponsor_seed,
-        account: account,
-        account_seed: account_seed,
-        third_account: third_account,
-        third_account_seed: third_account_seed
-    }) + '*' + '/' + "\n";
-    */
 
     if (s == "")
         return out + spacer.repeat(indent_level) + resolve + '(); // t1\n';
@@ -200,22 +188,6 @@ function generate_payment(indent_level, s, positive_test, resolve, reject, seed,
                           sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
 {
     let out = "";
-    /*
-    out =  '/' + '* PAYMENT ' + s + "\n" + 
-        "positive_test: " + positive_test + ",\n" +
-        "resolve: " + resolve + ",\n" +
-        "reject:" + reject + ",\n" +
-        "from: " + from + ",\n" +
-        "amount: " + amount + ",\n" +
-        "dest: " + dest + ",\n" +
-        "flags: " + flags + ",\n" +
-        "sponsor: " + sponsor + ",\n" +
-        "sponsor_seed: " + sponsor_seed + ",\n" +
-        "account: " + account + ",\n" +
-        "account_seed: " + account_seed + ",\n" +
-        "third_account: " + third_account + ",\n" +
-        "third_account_seed: " + third_account_seed + '*' + '/' + "\n";
-    */
     out += spacer.repeat(indent_level) + 'api.prepareTransaction({\n';
     indent_level++;
         out += spacer.repeat(indent_level) + 'Account: ' + from + ',\n';
@@ -385,6 +357,14 @@ console.log(`
 const keypairs = require("ripple-keypairs")
 const api_factory = require('ripple-lib').RippleAPI
 const api = new api_factory({server: 'ws://localhost:6005'})
+
+function ledger_accept(n) 
+{
+    if (n == undefined)
+        n = 1;
+    for (let i = 0; i < n; ++i)
+        api.connection._ws.send('{"command":"ledger_accept"}');
+};
 
 function random_address()
 {

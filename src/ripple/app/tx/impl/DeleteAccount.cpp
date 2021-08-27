@@ -196,6 +196,10 @@ DeleteAccount::preclaim(PreclaimContext const& ctx)
             // of the lite account is that 1 million ledgers have passed since the account made a txn
             int64_t lls = sleAccount->getFieldU32(sfPreviousTxnLgrSeq);
             int64_t cls = ctx.view.seq();
+            if (ctx.app.config().standalone() && cls - lls >= 2)
+            {
+                // pass
+            }
             if (cls - lls >= 1'000'000)
             {
                 // pass
@@ -314,7 +318,12 @@ DeleteAccount::doApply()
             // of the lite account is that 1 million ledgers have passed since the account made a txn
             int64_t lls = src->getFieldU32(sfPreviousTxnLgrSeq);
             int64_t cls = view().seq();
-            if (cls - lls >= 1'000'000)
+            
+            if (ctx_.app.config().standalone() && cls - lls >= 2)
+            {
+                // pass (standalone testing only requires 2 ledgers to have passed
+            }
+            else if (cls - lls >= 1'000'000)
             {
                 // pass
             }
