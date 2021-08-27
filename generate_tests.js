@@ -1,9 +1,10 @@
 
 const states = {
-    'A': 'Non-existent Account',
-    'B': 'Sponsored Lite Account',
-    'C': 'Unsponsored Lite Account',
-    'D': 'Full Account'
+    'L': 'Non-existent Account',
+    'M': 'Sponsored Lite Account with < 2 * Reserve',
+    'N': 'Unsponsored Lite Account',
+    'O': 'Full Account',
+    'P': 'Sponsored Lite Account with >= 2 * Reserve'
 }
 
 const transitions = {
@@ -16,7 +17,8 @@ const transitions = {
     '6': 'Delete Account by Account',
     '7': 'Normal Payment To Account From Sponsor',
     '8': 'Normal Payment To Sponsor From Account',
-    '9': 'Normal Payment To Non-Sponsor account From Account'
+    '9': 'Normal Payment To Non-Sponsor account From Account',
+    'A': 'Normal Payment To Account from Non-Sponsor'
 }
 
 const reserve_base = 200000000;
@@ -28,21 +30,25 @@ const transition_amounts = {
     '0': ()=>{return lite_reserve * 1.5},
     '1': ()=>{return lite_reserve},
     '4': ()=>{return lite_reserve},
-    '7': ()=>{return 2 * reserve_base + Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
+    '7': ()=>{return 2.5 * reserve_base + Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
     '8': ()=>{return Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
-    '9': ()=>{return Math.floor(Math.random() * normal_payment_min + normal_payment_max)}
+    '9': ()=>{return Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
+    'A': ()=>{return 2.5 * reserve_base + Math.floor(Math.random() * normal_payment_min + normal_payment_max)}
 }
 
 const  transition = {
-    'A': {0: 'B', 7: 'D'},
-    'B': {3: 'A', 4: 'C', 1: 'C', 7: 'B', 8: 'B', 9: 'B'},
-    'C': {2: 'D', 6: 'A', 7: 'C', 8: 'C', 9: 'B'},
-    'D': {5: 'C', 6: 'A', 7: 'D', 8: 'D', 9: 'B'}
+    'L': {'0': 'M', '7': 'O'},
+    'M': {'3': 'L', '7': 'P', '8': 'M', '9': 'M', 'A': 'P'},
+    'N': {'2': 'O', '6': 'L', '7': 'N', '8': 'N', '9': 'M', 'A': 'N'},
+    'O': {'5': 'N', '6': 'L', '7': 'O', '8': 'O', '9': 'M', 'A': 'O'},
+    'P': {'4': 'N', '1': 'N', '3': 'L', '7': 'P', '8': 'P', '9': 'P', 'A': 'P'}
 }
 
 const lsfSponsor = 0x00080000;
 const asfSponsored = 11;
 const asfLiteAccount = 10;
+
+var global_error_counter = 10000;
 
 const transition_action = {
     '0': (indent_level, s, positive_test, resolve, reject,
@@ -56,14 +62,14 @@ const transition_action = {
             sponsor, sponsor_seed, account, account_seed,third_account, third_account_seed, amount) => {
         // Remove sponsor (Upgrade 1)
         return generate_accountset(indent_level, s, positive_test, resolve, reject,
-            account_seed, account, null, asfSponsored, false,
+            account_seed, account, null, asfSponsored, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
     '2': (indent_level, s, positive_test, resolve, reject,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Become Full (Upgrade 2)
         return generate_accountset(indent_level, s, positive_test, resolve, reject,
-            account_seed, account, null, asfLiteAccount, false,
+            account_seed, account, null, asfLiteAccount, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
     '3': (indent_level, s, positive_test, resolve, reject,
@@ -77,14 +83,14 @@ const transition_action = {
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Forced Upgrade 1 by Sponsor
         return generate_accountset(indent_level, s, positive_test, resolve, reject,
-            sponsor_seed, account, null, asfSponsored, false,
+            sponsor_seed, account, null, asfSponsored, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
     '5': (indent_level, s, positive_test, resolve, reject,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Downgrade by accoount
         return generate_accountset(indent_level, s, positive_test, resolve, reject,
-            account_seed, account, asfLiteAccount, null, false,
+            account_seed, account, asfLiteAccount, null, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
     '6': (indent_level, s, positive_test, resolve, reject,
@@ -113,6 +119,13 @@ const transition_action = {
         // Normal Payment from Account to third account
         return generate_payment(indent_level, s, positive_test, resolve, reject,
             account_seed, account, amount, third_account, false,
+            sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
+    },
+    'A': (indent_level, s, positive_test, resolve, reject,
+            sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
+        // Normal Payment from Non-Sponsor
+        return generate_payment(indent_level, s, positive_test, resolve, reject,
+            third_account_seed, third_account, amount, account, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     }
 }
@@ -150,7 +163,6 @@ function generate_code(indent_level, s, positive_test, resolve, reject,
     amount = null
     if (t in transition_amounts)
         amount = transition_amounts[t]()
-
     return out + spacer.repeat(indent_level) + '/* ' + transitions[t] + ' [' + t + '] */\n' +
                 transition_action[t](indent_level, s.slice(2), positive_test, resolve, reject,
                     sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount);
@@ -164,7 +176,7 @@ function human_readable(indent_level, s)
     let level = 1;
     for (let x in s)
     {
-        x = parseInt(x)
+        x = parseInt(x, 16)
         if (x == s.length-1)
             break;
         let c = s[x];
@@ -223,7 +235,7 @@ function generate_payment(indent_level, s, positive_test, resolve, reject, seed,
         if (s.length > 1)
         {
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
-                '(response.resultCode);\n';
+                '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
                 sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed
             );
@@ -232,9 +244,9 @@ function generate_payment(indent_level, s, positive_test, resolve, reject, seed,
             out += spacer.repeat(indent_level) + resolve + '(response.resultCode ' +
                 (positive_test ? '=' : '!') + '= "tesSUCCESS");\n';
         indent_level--;
-        out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '(e);});\n'
+        out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     indent_level--;
-    out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '(e);});\n'
+    out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     return out;
 }
 
@@ -260,7 +272,7 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
         if (s.length > 1)
         {
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
-                '(response.resultCode);\n';
+                '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
                 sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed
             );
@@ -269,9 +281,9 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
             out += spacer.repeat(indent_level) + resolve + '(response.resultCode ' +
                 (positive_test ? '=' : '!') + '= "tesSUCCESS");\n';
         indent_level--;
-        out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '(e);});\n'
+        out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     indent_level--;
-    out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '(e);});\n'
+    out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     return out;
 }
 
@@ -298,7 +310,7 @@ function generate_accountset(indent_level, s, positive_test, resolve, reject, se
         if (s.length > 1)
         {
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
-                '(response.resultCode);\n';
+                '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
                 sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed
             );
@@ -307,9 +319,9 @@ function generate_accountset(indent_level, s, positive_test, resolve, reject, se
             out += spacer.repeat(indent_level) + resolve + '(response.resultCode ' +
                 (positive_test ? '=' : '!') + '= "tesSUCCESS");\n';
         indent_level--;
-        out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '(e);});\n'
+        out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     indent_level--;
-    out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '(e);});\n'
+    out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     return out;
 }
 
@@ -364,8 +376,8 @@ function negative(state, stack, negative_cases)
 }
 
 
-let positive_cases = positive('A').sort();
-let negative_cases = negative('A').sort();
+let positive_cases = positive('L').sort();
+let negative_cases = negative('L').sort();
 let counter = 1;
 
 // print header
@@ -417,14 +429,15 @@ function produce_cases(cases, namespace, counter = 0, should_succeed = true)
         console.log(spacer.repeat(2) + '});')
         console.log(spacer.repeat(2) + 'test' + counter + '.then(result=>{tests[' + counter + 
             '] = result; tests_updated('+counter+');})' +
-            '.catch(e=>{tests[' + counter + ']="ERROR"; tests_updated(' + counter + '); console.error(e);})');
+            '.catch(e=>{tests[' + counter + 
+            ']="ERROR: " + JSON.stringify(e); tests_updated(' + counter + ');})');
         counter++;
     }
     return counter
 }
 
-counter = produce_cases(positive_cases, "positive", 0, true);
-produce_cases(negative_cases, "negative", counter, false);
+counter = produce_cases(positive_cases.slice(0,1), "positive", 0, true);
+//produce_cases(negative_cases, "negative", counter, false);
 
 
 console.log(`
