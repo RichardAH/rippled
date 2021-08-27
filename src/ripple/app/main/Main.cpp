@@ -37,7 +37,7 @@
 #ifdef ENABLE_TESTS
 #include <beast/unit_test/match.hpp>
 #include <test/unit_test/multi_runner.h>
-#endif // ENABLE_TESTS
+#endif  // ENABLE_TESTS
 
 #include <google/protobuf/stubs/common.h>
 
@@ -338,7 +338,7 @@ runUnitTests(
     }
 }
 
-#endif // ENABLE_TESTS
+#endif  // ENABLE_TESTS
 //------------------------------------------------------------------------------
 
 int
@@ -438,7 +438,7 @@ run(int argc, char** argv)
         "unittest-jobs",
         po::value<std::size_t>(),
         "Number of unittest jobs to run in parallel (child processes).");
-#endif // ENABLE_TESTS
+#endif  // ENABLE_TESTS
 
     // These are hidden options, not intended to be shown in the usage/help
     // message
@@ -459,18 +459,22 @@ run(int argc, char** argv)
     p.add("parameters", -1);
 
     po::options_description all;
-    all.add(gen).add(rpc).add(data)
-#ifdef ENABLE_TESTS
-    .add(test)
-#endif // ENABLE_TESTS
-    .add(hidden);
-
-    po::options_description desc;
-    desc.add(gen).add(rpc).add(data)
+    all.add(gen)
+        .add(rpc)
+        .add(data)
 #ifdef ENABLE_TESTS
         .add(test)
-#endif // ENABLE_TESTS
-    ;
+#endif  // ENABLE_TESTS
+        .add(hidden);
+
+    po::options_description desc;
+    desc.add(gen)
+        .add(rpc)
+        .add(data)
+#ifdef ENABLE_TESTS
+        .add(test)
+#endif  // ENABLE_TESTS
+        ;
 
     // Parse options, if no error.
     try
@@ -543,7 +547,7 @@ run(int argc, char** argv)
             return 1;
         }
     }
-#endif // ENABLE_TESTS
+#endif  // ENABLE_TESTS
 
     auto config = std::make_unique<Config>();
 

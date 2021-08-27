@@ -35,7 +35,7 @@ namespace ripple {
 namespace test {
 class ShardArchiveHandler_test;
 }
-#endif //ENABLE_TESTS
+#endif  // ENABLE_TESTS
 namespace RPC {
 
 /** Handles the download and import of one or more shard archives. */
@@ -46,7 +46,7 @@ public:
         ClosureCounter<void, boost::system::error_code const&>;
 #ifdef ENABLE_TESTS
     friend class test::ShardArchiveHandler_test;
-#endif //ENABLE_TESTS
+#endif  // ENABLE_TESTS
 
     static boost::filesystem::path
     getDownloadDirectory(Config const& config);

@@ -125,7 +125,7 @@ matrix:
         - SKIP_TESTS=true
     # test-free builds
     - <<: *linux
-      if: commit_message !~ /travis_run_/ OR commit_message =~ /travis_run_linux/ OR commit_message =~ /travis_run_cov/
+      if: commit_message !~ /travis_run_/ OR commit_message =~ /travis_run_linux/
       compiler: gcc-8
       name: no-tests-unity, gcc-8
       env:
@@ -134,7 +134,7 @@ matrix:
         - CMAKE_ADD="-Dtests=OFF"
         - SKIP_TESTS=true
     - <<: *linux
-      if: commit_message !~ /travis_run_/ OR commit_message =~ /travis_run_linux/ OR commit_message =~ /travis_run_cov/
+      if: commit_message !~ /travis_run_/ OR commit_message =~ /travis_run_linux/
       compiler: clang-8
       name: no-tests-non-unity, clang-8
       env:
