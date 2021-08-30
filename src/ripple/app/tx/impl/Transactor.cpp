@@ -480,6 +480,15 @@ Transactor::checkSingleSign(PreclaimContext const& ctx)
     bool const isMasterDisabled = sleAccount->isFlag(lsfDisableMaster);
 
     auto const transactionType = ctx.tx.getTxnType();
+    
+    if (ctx.view.rules().enabled(featureLiteAccounts) && 
+       (transactionType == ttACCOUNT_SET || transactionType == ttACCOUNT_DELETE) &&
+       sleAccount->isFieldPresent(sfSponsor) && sleAccount->getAccountID(sfSponsor) == idSigner)
+    {
+        // Signing on behalf of a sponsored account,
+        // the txn-specific conditions for this are checked later. Continue.
+        return tesSUCCESS;
+    }
 
     if (ctx.view.rules().enabled(fixMasterKeyAsRegularKey))
     {
@@ -514,13 +523,6 @@ Transactor::checkSingleSign(PreclaimContext const& ctx)
     else if ((*sleAccount)[~sfRegularKey] == idSigner)
     {
         // Signing with the regular key. Continue.
-    }
-    else if (ctx.view.rules().enabled(featureLiteAccounts) && 
-            (transactionType == ttACCOUNT_SET || transactionType == ttACCOUNT_DELETE) &&
-            sleAccount->isFieldPresent(sfSponsor) && sleAccount->getAccountID(sfSponsor) == idSigner)
-    {
-        // Signing on behalf of a sponsored account,
-        // the txn-specific conditions for this are checked later. Continue.
     }
     else if (sleAccount->isFieldPresent(sfRegularKey))
     {

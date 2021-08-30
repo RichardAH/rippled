@@ -25,6 +25,8 @@ const reserve_base = 200000000;
 const lite_reserve = 40000000;
 const normal_payment_min = 10;
 const normal_payment_max = 50000;
+const delete_full_account_fee = 50000000;
+const delete_lite_account_fee = 10000000; 
 
 const transition_amounts = {
     '0': ()=>{return lite_reserve * 1.5},
@@ -51,82 +53,92 @@ const ledgers_before_force = 3;
 var global_error_counter = 10000;
 
 const transition_action = {
-    '0': (indent_level, s, positive_test, resolve, reject,
+    '0': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Payment with tfSponsor flag from sponsor to account
-        return generate_payment(indent_level, s, positive_test, resolve, reject,
+        return generate_payment(indent_level, s, positive_test, resolve, reject, current_state,
             sponsor_seed, sponsor, amount, account, lsfSponsor,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    '1': (indent_level, s, positive_test, resolve, reject,
+    '1': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed,third_account, third_account_seed, amount) => {
         // Remove sponsor (Upgrade 1)
-        return generate_accountset(indent_level, s, positive_test, resolve, reject,
+        return generate_accountset(indent_level, s, positive_test, resolve, reject, current_state,
             account_seed, account, null, asfSponsored, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    '2': (indent_level, s, positive_test, resolve, reject,
+    '2': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Become Full (Upgrade 2)
-        return generate_accountset(indent_level, s, positive_test, resolve, reject,
+        return generate_accountset(indent_level, s, positive_test, resolve, reject, current_state,
             account_seed, account, null, asfLiteAccount, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    '3': (indent_level, s, positive_test, resolve, reject,
+    '3': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Forced Delete by Sponsor
-        return spacer.repeat(indent_level) + 'ledger_accept(' + ledgers_before_force + ');\n' +    
-            generate_accountdelete(indent_level, s, positive_test, resolve, reject,
-            sponsor_seed, account, sponsor, false,
-            sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
+        let out = ''
+//        let out = spacer.repeat(indent_level) + 'ledger_accept(' + ledgers_before_force + ').then( ()=> {\n';
+//        indent_level++
+            out += generate_accountdelete(indent_level, s, positive_test, resolve, reject, current_state,
+                    sponsor_seed, account, sponsor, false,
+                    sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
+//        indent_level--;
+//        out += spacer.repeat(indent_level) + "}).catch(e=>{" + reject + "([e," + (global_error_counter++) + "]);});\n";
+        return out
     },
-    '4': (indent_level, s, positive_test, resolve, reject,
+    '4': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Forced Upgrade 1 by Sponsor
-        return spacer.repeat(indent_level) + 'ledger_accept(' + ledgers_before_force + ');\n' +
-            generate_accountset(indent_level, s, positive_test, resolve, reject,
-                sponsor_seed, account, null, asfSponsored, 
-                sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
+//        let out = spacer.repeat(indent_level) + 'ledger_accept(' + ledgers_before_force + ').then( ()=> {\n';
+//        indent_level++
+        let out = ''
+        out +=    generate_accountset(indent_level, s, positive_test, resolve, reject, current_state,
+                  sponsor_seed, account, null, asfSponsored, 
+                    sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
+//        indent_level--;
+//        out += spacer.repeat(indent_level) + "}).catch(e=>{" + reject + "([e," + (global_error_counter++) + "]);});\n";
+        return out
     },
-    '5': (indent_level, s, positive_test, resolve, reject,
+    '5': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Downgrade by accoount
-        return generate_accountset(indent_level, s, positive_test, resolve, reject,
+        return generate_accountset(indent_level, s, positive_test, resolve, reject, current_state,
             account_seed, account, asfLiteAccount, null, 
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    '6': (indent_level, s, positive_test, resolve, reject,
+    '6': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Delete by Accoount
-        return generate_accountdelete(indent_level, s, positive_test, resolve, reject,
+        return generate_accountdelete(indent_level, s, positive_test, resolve, reject, current_state,
             account_seed, account, sponsor, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
     },
-    '7': (indent_level, s, positive_test, resolve, reject,
+    '7': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Normal Payment from Sponsor
-        return generate_payment(indent_level, s, positive_test, resolve, reject,
+        return generate_payment(indent_level, s, positive_test, resolve, reject, current_state,
             sponsor_seed, sponsor, amount, account, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    '8': (indent_level, s, positive_test, resolve, reject,
+    '8': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Normal Payment from Account
-        return generate_payment(indent_level, s, positive_test, resolve, reject,
+        return generate_payment(indent_level, s, positive_test, resolve, reject, current_state,
             account_seed, account, amount, sponsor, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    '9': (indent_level, s, positive_test, resolve, reject,
+    '9': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Normal Payment from Account to third account
-        return generate_payment(indent_level, s, positive_test, resolve, reject,
+        return generate_payment(indent_level, s, positive_test, resolve, reject, current_state,
             account_seed, account, amount, third_account, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     },
-    'A': (indent_level, s, positive_test, resolve, reject,
+    'A': (indent_level, s, positive_test, resolve, reject, current_state,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount) => {
         // Normal Payment from Non-Sponsor
-        return generate_payment(indent_level, s, positive_test, resolve, reject,
+        return generate_payment(indent_level, s, positive_test, resolve, reject, current_state,
             third_account_seed, third_account, amount, account, false,
             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed);
     }
@@ -151,9 +163,14 @@ function generate_code(indent_level, s, positive_test, resolve, reject,
     amount = null
     if (t in transition_amounts)
         amount = transition_amounts[t]()
-    return out + spacer.repeat(indent_level) + '/* ' + transitions[t] + ' [' + t + '] */\n' +
-                transition_action[t](indent_level, s.slice(2), positive_test, resolve, reject,
+    out = spacer.repeat(indent_level) + 'ledger_accept('+(t == '3' || t == '4' ? '256' : '1')+').then( () =>  {\n';
+    indent_level++;
+    out += spacer.repeat(indent_level) + '/* ' + transitions[t] + ' [' + t + '] */\n' +
+                transition_action[t](indent_level, s.slice(2), positive_test, resolve, reject, c,
                     sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount);
+    indent_level--;
+    out += spacer.repeat(indent_level) + '}).catch(e=>{' + reject + '([e,' + (global_error_counter++) + ']);});\n';
+    return out
 }
 
 
@@ -184,12 +201,14 @@ function human_readable(indent_level, s)
     return out;
 }
 
-function generate_payment(indent_level, s, positive_test, resolve, reject, seed, from, amount, dest, flags,
-                          sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
+function generate_payment(indent_level, s, positive_test, resolve, reject,  current_state,
+                            seed, from, amount, dest, flags, 
+                            sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
 {
     let out = "";
     out += spacer.repeat(indent_level) + 'api.prepareTransaction({\n';
     indent_level++;
+//        out += spacer.repeat(indent_level) + 'LastLedgerSequence: max_ledger,\n';
         out += spacer.repeat(indent_level) + 'Account: ' + from + ',\n';
         out += spacer.repeat(indent_level) + 'TransactionType: "Payment",\n';
         out += spacer.repeat(indent_level) + 'Amount: "' + amount + '",\n';
@@ -213,8 +232,8 @@ function generate_payment(indent_level, s, positive_test, resolve, reject, seed,
             );
         }
         else
-            out += spacer.repeat(indent_level) + resolve + '(response.resultCode ' +
-                (positive_test ? '=' : '!') + '= "tesSUCCESS");\n';
+            out += spacer.repeat(indent_level) + resolve + '([response.resultCode ' +
+                (positive_test ? '=' : '!') + '= "tesSUCCESS", response.resultCode]);\n';
         indent_level--;
         out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     indent_level--;
@@ -222,20 +241,25 @@ function generate_payment(indent_level, s, positive_test, resolve, reject, seed,
     return out;
 }
 
-function generate_accountdelete(indent_level, s, positive_test, resolve, reject, seed, from, dest, flags,
+function generate_accountdelete(indent_level, s, positive_test, resolve, reject,  current_state,
+                                seed, from, dest, flags,
                                 sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
 {
     let out = "";
-    out += spacer.repeat(indent_level) + 'api.prepareTransaction({\n';
+    out += spacer.repeat(indent_level) + 'let accdel = {\n';
     indent_level++;
+//        out += spacer.repeat(indent_level) + 'LastLedgerSequence: max_ledger,\n';
         out += spacer.repeat(indent_level) + 'Account: ' + from + ',\n';
         out += spacer.repeat(indent_level) + 'TransactionType: "AccountDelete",\n';
         out += spacer.repeat(indent_level) + 'Destination: ' + dest + ',\n';
         if (flags)
             out += spacer.repeat(indent_level) + 'Flags: ' + flags + ',\n';
-        out += spacer.repeat(indent_level) + 'Fee: "10000"\n';
+        out += spacer.repeat(indent_level) + 'Fee: "' + 
+            (current_state == 'O' ? delete_full_account_fee : delete_lite_account_fee) + '"\n';
     indent_level--;
-    out += spacer.repeat(indent_level) + '}).then(unsigned_txn => {\n';
+    out += spacer.repeat(indent_level) + '}\n';
+    out += spacer.repeat(indent_level) + 'console.log("accdel", accdel);\n';
+    out += spacer.repeat(indent_level) + 'api.prepareTransaction(accdel).then(unsigned_txn => {\n';
     indent_level++;
         out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
         out += spacer.repeat(indent_level) + 'let signed_txn = api.sign(unsigned_txn.txJSON, ' + seed + ')\n';
@@ -250,8 +274,8 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
             );
         }
         else
-            out += spacer.repeat(indent_level) + resolve + '(response.resultCode ' +
-                (positive_test ? '=' : '!') + '= "tesSUCCESS");\n';
+            out += spacer.repeat(indent_level) + resolve + '([response.resultCode ' +
+                (positive_test ? '=' : '!') + '= "tesSUCCESS", response.resultCode]);\n';
         indent_level--;
         out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     indent_level--;
@@ -259,12 +283,14 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
     return out;
 }
 
-function generate_accountset(indent_level, s, positive_test, resolve, reject, seed, from, setflag, clearflag,
-                             sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
+function generate_accountset(indent_level, s, positive_test, resolve, reject, current_state,
+                                seed, from, setflag, clearflag,
+                                sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed)
 {
     let out = "";
     out += spacer.repeat(indent_level) + 'api.prepareTransaction({\n';
     indent_level++;
+//        out += spacer.repeat(indent_level) + 'LastLedgerSequence: max_ledger,\n';
         out += spacer.repeat(indent_level) + 'Account: ' + from + ',\n';
         out += spacer.repeat(indent_level) + 'TransactionType: "AccountSet",\n';
         if (setflag !== undefined && setflag !== null)
@@ -288,8 +314,8 @@ function generate_accountset(indent_level, s, positive_test, resolve, reject, se
             );
         }
         else
-            out += spacer.repeat(indent_level) + resolve + '(response.resultCode ' +
-                (positive_test ? '=' : '!') + '= "tesSUCCESS");\n';
+            out += spacer.repeat(indent_level) + resolve + '([response.resultCode ' +
+                (positive_test ? '=' : '!') + '= "tesSUCCESS", response.resultCode]);\n';
         indent_level--;
         out += spacer.repeat(indent_level) + '}).catch(e => {' + reject + '([e, ' + global_error_counter++ + ']);});\n'
     indent_level--;
@@ -356,18 +382,40 @@ let counter = 1;
 console.log(`
 const keypairs = require("ripple-keypairs")
 const api_factory = require('ripple-lib').RippleAPI
-const api = new api_factory({server: 'ws://localhost:6005'})
+var api = new api_factory({server: 'ws://localhost:6005', maxFeeXRP:"1000"})
 const wsf = require('ws')
-const ws = new wsf('ws://localhost:6005')
+
 function ledger_accept(n) 
 {
-    if (n == undefined)
-        n = 1;
-    for (let i = 0; i < n; ++i)
-    {
-        console.log("ledger_accept", i)
-        ws.send('{"command":"ledger_accept"}');
-    }
+    return new Promise((resolve, reject) => {
+        try {
+            api.disconnect()
+        } catch (e) {
+            console.log(e);
+        }
+
+        const ws = new wsf('ws://localhost:6005')
+        ws.on('open', ()=>{
+            //max_ledger += n;
+            if (n == undefined)
+                n = 1;
+            for (let i = 0; i < n; ++i)
+            {
+                if (i % 64 == 0)
+                    console.log("ledger_accept ... ", i)
+                ws.send('{"command":"ledger_accept"}');
+            }
+            ws.close();
+
+            let seconds = n/128 + 1;
+            setTimeout(()=>{
+                api.connect().then(() => {
+                    resolve();
+                }).catch((e)=>{
+                    reject(e);
+                })}, seconds * 1000);
+        });
+    });
 };
 
 function random_address()
@@ -382,11 +430,10 @@ const genesis = {seed: 'snoPBrXtMeMyMHUVTgbuqAfg1SUTb', address: 'rHb9CJAWyB4rj9
 const sponsor = random_address();
 const third = random_address();
 
-ws.on('open', ()=>{
     api.connect().then(() => {
         (new Promise((resolve, reject)=>{
 `);
-console.log(generate_payment(3, '', true, 'resolve','reject', 'genesis.seed', 'genesis.address', '100000000000', 'sponsor.address', ''));
+console.log(generate_payment(3, '', true, 'resolve','reject', 'L', 'genesis.seed', 'genesis.address', '100000000000', 'sponsor.address', ''));
 console.log(`
         })).then(setup_result=>{
             console.log("setup result:", setup_result);
@@ -394,8 +441,7 @@ console.log(`
             tests_description = {};
             const tests_updated = (testid)=>{
                 console.log(tests_description[testid])
-                console.log("===> " + (tests[testid] === true ? 'PASS' : 
-                    tests[testid] === false ? 'FAIL' : tests[testid]))
+                console.log("===> " + (tests[testid][0] === true ? 'PASS' :  'FAIL' ) + ' - ' + tests[testid][1])
             }
 `);
 
@@ -416,7 +462,7 @@ function produce_cases(indent_level, cases, namespace, counter = 0, should_succe
             'result => {tests[' + counter + 
             '] = result; tests_updated('+counter+');}).catch(\n' + 
             spacer.repeat(indent_level + 1) + 'e => {tests[' + counter + 
-            ']="ERROR: " + JSON.stringify(e); tests_updated(' + counter + ');})');
+            ']="ERROR: " + JSON.stringify(e) + "; " + e; tests_updated(' + counter + ');})');
         counter++;
     }
     return counter
@@ -428,5 +474,4 @@ counter = produce_cases(3, positive_cases.slice(0,1), "positive", 0, true);
 
 console.log('       }).catch(e=>{throw(e);});');
 console.log('   }).catch(console.error);');
-console.log('})')
 

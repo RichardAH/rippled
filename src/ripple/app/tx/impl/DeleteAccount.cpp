@@ -59,7 +59,11 @@ DeleteAccount::calculateBaseFee(ReadView const& view, STTx const& tx)
     // owner reserve is stored in drops.  We need to convert it to fee units.
     Fees const& fees{view.fees()};
     std::pair<bool, FeeUnit64> const mulDivResult{
-        mulDiv(fees.increment, safe_cast<FeeUnit64>(fees.units), fees.base)};
+        mulDiv(
+            view.rules().enabled(featureLiteAccounts) ?
+                fees.accountReserve(0, true) :
+                fees.increment, 
+            safe_cast<FeeUnit64>(fees.units), fees.base)};
     if (mulDivResult.first)
         return mulDivResult.second;
 
@@ -196,16 +200,19 @@ DeleteAccount::preclaim(PreclaimContext const& ctx)
             // of the lite account is that 1 million ledgers have passed since the account made a txn
             int64_t lls = sleAccount->getFieldU32(sfPreviousTxnLgrSeq);
             int64_t cls = ctx.view.seq();
-            if (ctx.app.config().standalone() && cls - lls >= 2)
+            if (ctx.app.config().standalone() && cls - lls >= 256)
             {
                 // pass
+                printf("DeleteAccount lite pass A\n");
             }
-            if (cls - lls >= 1'000'000)
+            else if (cls - lls >= 1'000'000)
             {
+                printf("DeleteAccount lite pass B\n");
                 // pass
             }
             else
             {
+                printf("DeleteAccount lite fail C\n");
                 // can't delete until 1 million ledgers without use
                 return tecNO_PERMISSION;
             }
