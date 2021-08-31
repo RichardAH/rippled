@@ -160,14 +160,71 @@ function generate_code(indent_level, s, positive_test, resolve, reject,
     if (t == "")
         return out + spacer.repeat(indent_level) + resolve + '(); // t2\n';
 
+    out += spacer.repeat(indent_level) + 'account_info(' + account + ').then(ai => {\n'
+    indent_level++
+
+
+    // assert the state 
+/*
+    'L': 'Non-existent Account',
+    'M': 'Sponsored LiteAcc < 2 Reserve',
+    'N': 'Unsponsored Lite Account',
+    'O': 'Full Account',
+    'P': 'Sponsored LiteAcc >= 2 Reserve'
+    lsfLiteAccount = 0x02000000,    // True, this account is a lite account                                            
+    lsfSponsored   = 0x04000000,    // True, this account is a sponsored lite account        
+ */
+//    out += spacer.repeat(indent_level) + 'console.log(ai)\n';
+    if (c == 'L') // unfunded account
+        out += spacer.repeat(indent_level) + 'if (ai.error != "actNotFound")\n' + 
+            spacer.repeat(indent_level + 1) + 
+            'reject(["account exists when it should not", ' + (global_error_counter++) + '])\n';
+    else if (c != 'L')
+    {
+        out += spacer.repeat(indent_level) + 'if (typeof(ai.error) != "undefined")\n' + 
+            spacer.repeat(indent_level + 1) + 
+            'reject(["account does not exist when it should", ' + (global_error_counter++) + '])\n';
+   
+        // lite account states
+        if (c == 'M' || c == 'N' || c == 'P')
+            out += spacer.repeat(indent_level) + 'if (ai.result.Flags & lsfLiteAccount == 0)\n' + 
+                spacer.repeat(indent_level + 1) + 
+                    'reject(["account is not lite when it should be", ' + (global_error_counter++) + '])\n';
+        else
+        {
+            out += spacer.repeat(indent_level) + 'if (ai.result.Flags & lsfLiteAccount != 0)\n' + 
+                spacer.repeat(indent_level + 1) + 
+                'reject(["account is sponsored when it should not be", ' + (global_error_counter++) + '])\n';
+        }
+
+        // sponsored states
+        if (c == 'M' || c == 'P')
+        {
+            out += spacer.repeat(indent_level) + 'if (ai.result.Flags & lsfSponsored == 0)\n' + 
+                spacer.repeat(indent_level + 1) + 
+                'reject(["account is not sponsored when it should be", ' + (global_error_counter++) + '])\n';
+            out += spacer.repeat(indent_level) + 'if (ai.result.account_data.Sponsor == undefined)\n' + 
+                spacer.repeat(indent_level + 1) + 
+                'reject(["account is missing sfSponsor field", ' + (global_error_counter++) + '])\n';
+        }
+        else
+        {
+            out += spacer.repeat(indent_level) + 'if (ai.result.Flags & lsfSponsored != 0)\n' + 
+                spacer.repeat(indent_level + 1) + 
+                'reject(["account is sponsored when it should not be", ' + (global_error_counter++) + '])\n';
+        }
+    }
+
     amount = null
     if (t in transition_amounts)
         amount = transition_amounts[t]()
-    out = spacer.repeat(indent_level) + 'ledger_accept('+(t == '3' || t == '4' ? '256' : '1')+').then( () =>  {\n';
+    out += spacer.repeat(indent_level) + 'ledger_accept('+(t == '3' || t == '4' ? '256' : '1')+').then( () =>  {\n';
     indent_level++;
     out += spacer.repeat(indent_level) + '/* ' + transitions[t] + ' [' + t + '] */\n' +
                 transition_action[t](indent_level, s.slice(2), positive_test, resolve, reject, c,
                     sponsor, sponsor_seed, account, account_seed, third_account, third_account_seed, amount);
+    indent_level--;
+    out += spacer.repeat(indent_level) + '}).catch(e=>{' + reject + '([e,' + (global_error_counter++) + ']);});\n';
     indent_level--;
     out += spacer.repeat(indent_level) + '}).catch(e=>{' + reject + '([e,' + (global_error_counter++) + ']);});\n';
     return out
@@ -385,6 +442,40 @@ const api_factory = require('ripple-lib').RippleAPI
 var api = new api_factory({server: 'ws://localhost:6005', maxFeeXRP:"1000"})
 const wsf = require('ws')
 
+const lsfLiteAccount = 0x02000000
+const lsfSponsored   = 0x04000000
+
+function account_info(account) 
+{
+    return new Promise((resolve, reject) => {
+        try {
+            api.disconnect()
+        } catch (e) {
+            console.log(e);
+        }
+
+        const ws = new wsf('ws://localhost:6005')
+        
+        ws.on('message', m=>{
+
+            api.connect().then(() => {
+                try {
+                    resolve(JSON.parse(m))
+                } catch (e) {
+                    reject(m)
+                }
+            }).catch((e)=>{
+                reject(e);
+            })
+        })
+
+        
+        ws.on('open', ()=>{
+           ws.send('{"command":"account_info", "account":"' + account + '"}') 
+        })
+    })
+}
+
 function ledger_accept(n) 
 {
     return new Promise((resolve, reject) => {
@@ -441,7 +532,8 @@ console.log(`
             tests_description = {};
             const tests_updated = (testid)=>{
                 console.log(tests_description[testid])
-                console.log("===> " + (tests[testid][0] === true ? 'PASS' :  'FAIL' ) + ' - ' + tests[testid][1])
+                console.log("===> " + (tests[testid][0] === true ? 'PASS' :  'FAIL' ) + ' - ' + 
+                    (typeof(tests[testid]) == 'string' ? tests[testid] :  tests[testid][1]))
             }
 `);
 
