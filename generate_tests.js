@@ -237,14 +237,12 @@ function human_readable(indent_level, s, quote_after_indent)
     let out = "";
     let level = 1;
         
-    for (let x in s)
+    for (let x = 0; x < s.length-1; ++x)
     {
-        x = parseInt(x, 16)
-        if (x == s.length-1)
-            break;
         let c = s[x];
         let n = (x + 1 < s.length ? s[x+1] : '')
         n = (n in states ? "(" + states[n] + ")" : "(INVALID)")
+
         if (c in transitions)
             out += " + " +
                 transitions[c] + "" + (n != '' ? " = " + n : "") + (x == s.length-2 ? "" : "\n")
@@ -253,7 +251,10 @@ function human_readable(indent_level, s, quote_after_indent)
         else if (c == 'X')
             out += spacer.repeat(indent_level + level) + "(INVALID)" 
         else
-            throw("invalid char " + c)
+        {
+            console.log('s', s)
+            throw("invalid char in`" + s + '`:`' + c + '`')
+        }
     }
 
     if (quote_after_indent)
@@ -263,7 +264,7 @@ function human_readable(indent_level, s, quote_after_indent)
         let front = new RegExp('^' + spacer.repeat(indent_level), 'img')
         for (x in lines)
         {
-            out += lines[x].replace(front, spacer.repeat(indent_level) + '`') + '` + \n'
+            out += lines[x].replace(front, spacer.repeat(indent_level) + '`') + '\\n` + \n'
         }
         out = out.slice(0,-3)
     }
@@ -452,7 +453,11 @@ let counter = 1;
 console.log(`
 const keypairs = require("ripple-keypairs")
 const api_factory = require('ripple-lib').RippleAPI
-var api = new api_factory({server: 'ws://localhost:6005', maxFeeXRP:"1000"})
+const make_api = ()=>{
+    return new api_factory({server: 'ws://localhost:6005', maxFeeXRP:"1000"});
+};
+
+var api = make_api();
 const wsf = require('ws')
 
 const lsfLiteAccount = 0x02000000
@@ -461,64 +466,70 @@ const lsfSponsored   = 0x04000000
 function account_info(account) 
 {
     return new Promise((resolve, reject) => {
-        try {
-            api.disconnect()
-        } catch (e) {
-            console.log(e);
-        }
+        const after_disconnect = (e)=> {
 
-        const ws = new wsf('ws://localhost:6005')
-        
-        ws.on('message', m=>{
+            if (e)
+                console.log("api.disconnect:", e)
 
-            api.connect().then(() => {
-                try {
-                    resolve(JSON.parse(m))
-                } catch (e) {
-                    reject(m)
-                }
-            }).catch((e)=>{
-                reject(e);
+            const ws = new wsf('ws://localhost:6005')
+            
+            ws.on('message', retry = m=>{
+                api = make_api();
+                api.connect().then(() => {
+                    try {
+                        resolve(JSON.parse(m))
+                    } catch (e) {
+                        reject(m)
+                    }
+                }).catch((e)=>{
+                    //reject(e);
+                    retry()
+                })
             })
-        })
 
-        
-        ws.on('open', ()=>{
-           ws.send('{"command":"account_info", "account":"' + account + '"}') 
-        })
+            
+            ws.on('open', ()=>{
+               ws.send('{"command":"account_info", "account":"' + account + '"}') 
+            })
+        }
+        after_disconnect();
+//        api.disconnect().then(after_disconnect).catch(after_disconnect);
     })
 }
 
 function ledger_accept(n) 
 {
     return new Promise((resolve, reject) => {
-        try {
-            api.disconnect()
-        } catch (e) {
-            console.log(e);
-        }
+        const after_disconnect = (e)=> {
 
-        const ws = new wsf('ws://localhost:6005')
-        ws.on('open', ()=>{
-            //max_ledger += n;
-            if (n == undefined)
-                n = 1;
-            for (let i = 0; i < n; ++i)
-            {
-                if (i % 64 == 0)
-                    console.log("ledger_accept ... ", i)
-                ws.send('{"command":"ledger_accept"}');
-            }
-            ws.close();
+            if (e)
+                console.log("api.disconnect:", e)
 
-            let seconds = n/128 + 1;
-            setTimeout(()=>{
-                api.connect().then(() => {
-                    resolve();
-                }).catch((e)=>{
-                    reject(e);
-                })}, seconds * 1000);
-        });
+            const ws = new wsf('ws://localhost:6005')
+            ws.on('open', ()=>{
+                //max_ledger += n;
+                if (n == undefined)
+                    n = 1;
+                for (let i = 0; i < n; ++i)
+                {
+                    if (i % 64 == 0)
+                        console.log("ledger_accept ... ", i)
+                    ws.send('{"command":"ledger_accept"}');
+                }
+                ws.close();
+
+                let seconds = n/128 + 1;
+                setTimeout(retry = ()=>{
+                    api = make_api();
+                    api.connect().then(() => {
+                        resolve();
+                    }).catch((e)=>{
+                        retry();
+                    })}, seconds * 1000);
+            });
+        };
+        after_disconnect();
+        //api.disconnect().then(after_disconnect).catch(after_disconnect);
     });
 };
 
@@ -537,7 +548,8 @@ const third = random_address();
     api.connect().then(() => {
         (new Promise((resolve, reject)=>{
 `);
-console.log(generate_payment(3, '', true, 'resolve','reject', 'L', 'genesis.seed', 'genesis.address', '100000000000', 'sponsor.address', ''));
+console.log(generate_payment(3, '', true, 'resolve','reject', 'L',
+    'genesis.seed', 'genesis.address', '100000000000', 'sponsor.address', ''));
 console.log(`
         })).then(setup_result=>{
             console.log("setup result:", setup_result);
@@ -551,7 +563,15 @@ console.log(`
                 let prom = tests_functions(testid);
                 if (prom)
                     prom.then(
-                        result => {tests[testid] = result; tests_updated(testid);}
+                        result => {
+                            tests[testid] = result;
+                            ledger_accept(1).then(()=>{
+                                tests_updated(testid);
+                            }).catch(e => {
+                                console.log(e)
+                                process.exit(1);
+                            })
+                        }
                     ).catch(e => {tests[testid] = "ERROR: " + JSON.stringify(e) + "; " + e; tests_updated(testid);});
                 else
                 {
@@ -571,10 +591,12 @@ function produce_cases(indent_level, cases, namespace, counter = 0, should_succe
     {
         console.log(spacer.repeat(indent_level) + '/* ' + namespace + ' test ' + counter + ' [' + cases[x] + ']')
         console.log(human_readable(indent_level, cases[x]) + ' run=' + (i+1) + '/ */')
-        console.log(spacer.repeat(indent_level) + 'if (testid == ' + counter + ') return new Promise((resolve, reject)=>{');
+        console.log(spacer.repeat(indent_level) +
+            'if (testid == ' + counter + ') return new Promise((resolve, reject)=>{');
         console.log(spacer.repeat(indent_level + 1) + 'const account = random_address();');
-        console.log(spacer.repeat(indent_level + 1) + "tests_description[" + counter + "] = \n" + spacer.repeat(indent_level + 1) + 
-            '`' + namespace + " test " + counter + " [" + cases[x] + "]:` +\n" + human_readable(indent_level + 1, cases[x], true) + ";")
+        console.log(spacer.repeat(indent_level + 1) + "tests_description[" + counter + "] = \n" + 
+            spacer.repeat(indent_level + 1) + '`' + namespace + " test " + counter + " [" + cases[x] + "]:\\n` +\n" + 
+            human_readable(indent_level + 1, cases[x], true) + ";")
         console.log(generate_code(indent_level + 1, cases[x], should_succeed, 'resolve', 'reject',
             'sponsor.address', 'sponsor.seed', 'account.address', 'account.seed', 'third.address', 'third.seed'));
         console.log(spacer.repeat(indent_level) + '});')
@@ -590,14 +612,12 @@ function produce_cases(indent_level, cases, namespace, counter = 0, should_succe
 }
 
 
-counter = produce_cases(4, positive_cases.slice(0,1), "positive", 0, true);
-//produce_cases(negative_cases, "negative", counter, false);
+counter = produce_cases(4, positive_cases, "positive", 0, true);
+produce_cases(negative_cases, "negative", counter, false);
 console.log(spacer.repeat(4) + 'return false;')
 console.log(spacer.repeat(3) + '}')
 console.log(spacer.repeat(3) + 'tests_functions(0).then(result => {tests[0] = result; tests_updated(0);}).catch(\n' +
    spacer.repeat(3) + 'e => {tests[0]="ERROR: " + JSON.stringify(e) + "; " + e; tests_updated(0);})');
-
-
 console.log('       }).catch(e=>{throw(e);});');
 console.log('   }).catch(console.error);');
 
