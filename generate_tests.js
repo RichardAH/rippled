@@ -21,21 +21,27 @@ const transitions = {
     'A': 'Normal Payment To Account from Non-Sponsor'
 }
 
-const reserve_base = 200000000;
-const lite_reserve = 40000000;
+
 const normal_payment_min = 10;
 const normal_payment_max = 50000;
-const delete_full_account_fee = 50000000;
-const delete_lite_account_fee = 10000000; 
+
+var fees = {
+    "ReserveBase":200000000,                                                                                            
+    "ReserveIncrement":50000000
+}
+/*
+accountReserve(0, false) = 200000000
+accountReserve(0, true) = 50000000
+*/
 
 const transition_amounts = {
-    '0': ()=>{return lite_reserve * 1.5},
-    '1': ()=>{return lite_reserve},
-    '4': ()=>{return lite_reserve},
-    '7': ()=>{return 2.5 * reserve_base + Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
+    '0': ()=>{return Math.ceil((fees["ReserveIncrement"]/5) * 1.5)},
+    '1': ()=>{return Math.ceil(fees["ReserveIncrement"]/5)},
+    '4': ()=>{return Math.ceil(fees["ReserveIncrement"]/5)},
+    '7': ()=>{return Math.ceil(2.5 * fees["ReserveBase"] + Math.floor(Math.random() * normal_payment_min + normal_payment_max))},
     '8': ()=>{return Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
     '9': ()=>{return Math.floor(Math.random() * normal_payment_min + normal_payment_max)},
-    'A': ()=>{return 2.5 * reserve_base + Math.floor(Math.random() * normal_payment_min + normal_payment_max)}
+    'A': ()=>{return Math.ceil(2.5 * fees["ReserveBase"] + Math.floor(Math.random() * normal_payment_min + normal_payment_max))}
 }
 
 const  transition = {
@@ -296,6 +302,7 @@ function generate_payment(indent_level, s, positive_test, resolve, reject,  curr
         indent_level++;
         if (s.length > 1)
         {
+            out += spacer.repeat(indent_level) + 'console.log(response);\n'
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
                 '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
@@ -326,7 +333,7 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
         if (flags)
             out += spacer.repeat(indent_level) + 'Flags: ' + flags + ',\n';
         out += spacer.repeat(indent_level) + 'Fee: "' + 
-            (current_state == 'O' ? delete_full_account_fee : delete_lite_account_fee) + '"\n';
+            (current_state == 'O' ? Math.ceil(fees["ReserveBase"]/4) : Math.ceil(fees["ReserveIncrement"]/5)) + '"\n'; // delete full/lite acccount fee
     indent_level--;
     out += spacer.repeat(indent_level) + '}\n';
     out += spacer.repeat(indent_level) + 'console.log("accdel", accdel);\n';
@@ -338,6 +345,7 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
         indent_level++;
         if (s.length > 1)
         {
+            out += spacer.repeat(indent_level) + 'console.log(response);\n'
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
                 '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
@@ -378,6 +386,7 @@ function generate_accountset(indent_level, s, positive_test, resolve, reject, cu
         indent_level++;
         if (s.length > 1)
         {
+            out += spacer.repeat(indent_level) + 'console.log(response);\n'
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
                 '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
@@ -477,7 +486,9 @@ function account_info(account)
                 api = make_api();
                 api.connect().then(() => {
                     try {
-                        resolve(JSON.parse(m))
+                        i = JSON.parse(m)
+                        console.log(i)
+                        resolve(i)
                     } catch (e) {
                         reject(m)
                     }
@@ -518,14 +529,48 @@ function ledger_accept(n)
                 }
                 ws.close();
 
+/*
+> {"command": "ledger_entry",  "index": "4BC50C9B0D8515D3EAAE1E74B29A95804346C491EE1A95BF25E4AAB854A6A651",  "ledger_index": "validated"}
+< {"result":{
+"index":"4BC50C9B0D8515D3EAAE1E74B29A95804346C491EE1A95BF25E4AAB854A6A651",
+"ledger_hash":"26E0C6882676307E3B3C6B6C55B69C280C72AF9E9AD6A6ED762EF78FF3563714",
+"ledger_index":292,
+"node":{
+    "BaseFee":"a",
+    "Flags":0,
+    "LedgerEntryType":"FeeSettings",
+    "ReferenceFeeUnits":10,
+    "ReserveBase":20000000,
+    "ReserveIncrement":5000000,
+    "index":"4BC50C9B0D8515D3EAAE1E74B29A95804346C491EE1A95BF25E4AAB854A6A651"},
+    "validated":true
+},"status":"success","type":"response"}
+
+< {"error":"entryNotFound","ledger_hash":"E395D322D748D4C792BE4E345DCAB83A86B636D5FAAE9A68C81C9AB0DF756CBA","ledger_index":2,"request":{"command":"ledger_entry","index":"4BC50C9B0D8515D3EAAE1E74B29A95804346C491EE1A95BF25E4AAB854A6A651","ledger_index":"validated"},"status":"error","type":"response","validated":true}
+*/
+
+
                 let seconds = n/128 + 1;
                 setTimeout(retry = ()=>{
-                    api = make_api();
-                    api.connect().then(() => {
-                        resolve();
-                    }).catch((e)=>{
-                        retry();
-                    })}, seconds * 1000);
+                    ws2 = new wsf('ws://localhost:6005')
+                    ws2.on('open', ()=>{
+                        ws2.send('{"command": "ledger_entry",  "index": "4BC50C9B0D8515D3EAAE1E74B29A95804346C491EE1A95BF25E4AAB854A6A651",  "ledger_index": "validated"}');
+                        ws2.on('message', m => {
+                            let f = JSON.parse(m)
+                            if (f.result && f.result.node)
+                                fees = f.result.node
+
+                            ws2.close()
+                            api = make_api();
+                            api.connect().then(() => {
+                                resolve();
+                            }).catch((e)=>{
+                                retry();
+                            })
+                        })
+                    });
+                }, seconds * 1000);
+
             });
         };
         after_disconnect();
@@ -612,8 +657,8 @@ function produce_cases(indent_level, cases, namespace, counter = 0, should_succe
 }
 
 
-counter = produce_cases(4, positive_cases, "positive", 0, true);
-produce_cases(negative_cases, "negative", counter, false);
+counter = produce_cases(4, [positive_cases[0]], "positive", 0, true);
+//produce_cases(negative_cases, "negative", counter, false);
 console.log(spacer.repeat(4) + 'return false;')
 console.log(spacer.repeat(3) + '}')
 console.log(spacer.repeat(3) + 'tests_functions(0).then(result => {tests[0] = result; tests_updated(0);}).catch(\n' +
