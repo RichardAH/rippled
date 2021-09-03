@@ -232,10 +232,11 @@ function generate_code(indent_level, s, positive_test, resolve, reject,
 
 
 const spacer = '    ';
-function human_readable(indent_level, s)
+function human_readable(indent_level, s, quote_after_indent)
 {
     let out = "";
     let level = 1;
+        
     for (let x in s)
     {
         x = parseInt(x, 16)
@@ -248,14 +249,26 @@ function human_readable(indent_level, s)
             out += " + " +
                 transitions[c] + "" + (n != '' ? " = " + n : "") + (x == s.length-2 ? "" : "\n")
         else if (c in states)
-            out += spacer.repeat(indent_level + level) + "(" + states[c] + ")"
+            out += spacer.repeat(indent_level + level) + "(" + states[c] + ")" 
         else if (c == 'X')
-            out += spacer.repeat(indent_level + level) + "(INVALID)"
+            out += spacer.repeat(indent_level + level) + "(INVALID)" 
         else
             throw("invalid char " + c)
     }
 
-    return out;
+    if (quote_after_indent)
+    {
+        lines = out.split('\n')
+        out = ""
+        let front = new RegExp('^' + spacer.repeat(indent_level), 'img')
+        for (x in lines)
+        {
+            out += lines[x].replace(front, spacer.repeat(indent_level) + '`') + '` + \n'
+        }
+        out = out.slice(0,-3)
+    }
+    return out
+
 }
 
 function generate_payment(indent_level, s, positive_test, resolve, reject,  current_state,
@@ -534,34 +547,55 @@ console.log(`
                 console.log(tests_description[testid])
                 console.log("===> " + (tests[testid][0] === true ? 'PASS' :  'FAIL' ) + ' - ' + 
                     (typeof(tests[testid]) == 'string' ? tests[testid] :  tests[testid][1]))
+                testid++
+                let prom = tests_functions(testid);
+                if (prom)
+                    prom.then(
+                        result => {tests[testid] = result; tests_updated(testid);}
+                    ).catch(e => {tests[testid] = "ERROR: " + JSON.stringify(e) + "; " + e; tests_updated(testid);});
+                else
+                {
+                    console.log("finished")
+                    process.exit(0)
+                }
             }
+            function tests_functions(testid)
+            {
 `);
 
 
 function produce_cases(indent_level, cases, namespace, counter = 0, should_succeed = true)
 {
     for (let x in cases)
+    for (let i = 0; i < 2; ++i)
     {
         console.log(spacer.repeat(indent_level) + '/* ' + namespace + ' test ' + counter + ' [' + cases[x] + ']')
-        console.log(human_readable(indent_level, cases[x]) + ' */')
-        console.log(spacer.repeat(indent_level) + 'let test' + counter + ' = new Promise((resolve, reject)=>{');
+        console.log(human_readable(indent_level, cases[x]) + ' run=' + (i+1) + '/ */')
+        console.log(spacer.repeat(indent_level) + 'if (testid == ' + counter + ') return new Promise((resolve, reject)=>{');
         console.log(spacer.repeat(indent_level + 1) + 'const account = random_address();');
-        console.log(spacer.repeat(indent_level + 1) + "tests_description[" + counter + "] = `" + namespace + " test " + counter + ": " + cases[x] + "\n" + human_readable(1, cases[x]) + "`;")
+        console.log(spacer.repeat(indent_level + 1) + "tests_description[" + counter + "] = \n" + spacer.repeat(indent_level + 1) + 
+            '`' + namespace + " test " + counter + " [" + cases[x] + "]:` +\n" + human_readable(indent_level + 1, cases[x], true) + ";")
         console.log(generate_code(indent_level + 1, cases[x], should_succeed, 'resolve', 'reject',
             'sponsor.address', 'sponsor.seed', 'account.address', 'account.seed', 'third.address', 'third.seed'));
         console.log(spacer.repeat(indent_level) + '});')
-        console.log(spacer.repeat(indent_level) + 'test' + counter + '.then(' +
+/*        console.log(spacer.repeat(indent_level) + 'test' + counter + '.then(' +
             'result => {tests[' + counter + 
             '] = result; tests_updated('+counter+');}).catch(\n' + 
             spacer.repeat(indent_level + 1) + 'e => {tests[' + counter + 
             ']="ERROR: " + JSON.stringify(e) + "; " + e; tests_updated(' + counter + ');})');
+*/
         counter++;
     }
     return counter
 }
 
-counter = produce_cases(3, positive_cases.slice(0,1), "positive", 0, true);
+
+counter = produce_cases(4, positive_cases.slice(0,1), "positive", 0, true);
 //produce_cases(negative_cases, "negative", counter, false);
+console.log(spacer.repeat(4) + 'return false;')
+console.log(spacer.repeat(3) + '}')
+console.log(spacer.repeat(3) + 'tests_functions(0).then(result => {tests[0] = result; tests_updated(0);}).catch(\n' +
+   spacer.repeat(3) + 'e => {tests[0]="ERROR: " + JSON.stringify(e) + "; " + e; tests_updated(0);})');
 
 
 console.log('       }).catch(e=>{throw(e);});');
