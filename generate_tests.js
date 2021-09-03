@@ -24,6 +24,7 @@ const transitions = {
 
 const normal_payment_min = 10;
 const normal_payment_max = 50000;
+const debug = false;
 
 var fees = {
     "ReserveBase":200000000,                                                                                            
@@ -296,13 +297,15 @@ function generate_payment(indent_level, s, positive_test, resolve, reject,  curr
     indent_level--;
     out += spacer.repeat(indent_level) + '}).then(unsigned_txn => {\n';
     indent_level++;
-        out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
+        if (debug)
+            out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
         out += spacer.repeat(indent_level) + 'let signed_txn = api.sign(unsigned_txn.txJSON, ' + seed + ')\n';
         out += spacer.repeat(indent_level) + 'api.submit(signed_txn.signedTransaction).then(response => {\n';
         indent_level++;
         if (s.length > 1)
         {
-            out += spacer.repeat(indent_level) + 'console.log(response);\n'
+            if (debug)
+                out += spacer.repeat(indent_level) + 'console.log(response);\n';
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
                 '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
@@ -336,16 +339,18 @@ function generate_accountdelete(indent_level, s, positive_test, resolve, reject,
             (current_state == 'O' ? Math.ceil(fees["ReserveBase"]/4) : Math.ceil(fees["ReserveIncrement"]/5)) + '"\n'; // delete full/lite acccount fee
     indent_level--;
     out += spacer.repeat(indent_level) + '}\n';
-    out += spacer.repeat(indent_level) + 'console.log("accdel", accdel);\n';
+//    out += spacer.repeat(indent_level) + 'console.log("accdel", accdel);\n';
     out += spacer.repeat(indent_level) + 'api.prepareTransaction(accdel).then(unsigned_txn => {\n';
     indent_level++;
-        out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
+        if (debug)
+            out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
         out += spacer.repeat(indent_level) + 'let signed_txn = api.sign(unsigned_txn.txJSON, ' + seed + ')\n';
         out += spacer.repeat(indent_level) + 'api.submit(signed_txn.signedTransaction).then(response => {\n';
         indent_level++;
         if (s.length > 1)
         {
-            out += spacer.repeat(indent_level) + 'console.log(response);\n'
+            if (debug)
+                out += spacer.repeat(indent_level) + 'console.log(response);\n';
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
                 '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
@@ -380,13 +385,15 @@ function generate_accountset(indent_level, s, positive_test, resolve, reject, cu
     indent_level--;
     out += spacer.repeat(indent_level) + '}).then(unsigned_txn => {\n';
     indent_level++;
-        out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
+        if (debug)
+            out += spacer.repeat(indent_level) + 'console.log("submitting txn", unsigned_txn.txJSON);\n';
         out += spacer.repeat(indent_level) + 'let signed_txn = api.sign(unsigned_txn.txJSON, ' + seed + ')\n';
         out += spacer.repeat(indent_level) + 'api.submit(signed_txn.signedTransaction).then(response => {\n';
         indent_level++;
         if (s.length > 1)
         {
-            out += spacer.repeat(indent_level) + 'console.log(response);\n'
+            if (debug)
+                out += spacer.repeat(indent_level) + 'console.log(response);\n';
             out += spacer.repeat(indent_level) + 'if (response.resultCode != "tesSUCCESS") return ' + reject + 
                 '([response.resultCode,' + global_error_counter++ + ']);\n';
             out += generate_code(indent_level, s, positive_test, resolve, reject,
@@ -471,7 +478,7 @@ const wsf = require('ws')
 
 const lsfLiteAccount = 0x02000000
 const lsfSponsored   = 0x04000000
-
+const debug = ` + debug + `;
 function account_info(account) 
 {
     return new Promise((resolve, reject) => {
@@ -487,7 +494,8 @@ function account_info(account)
                 api.connect().then(() => {
                     try {
                         i = JSON.parse(m)
-                        console.log(i)
+                        if (debug)
+                            console.log(i);
                         resolve(i)
                     } catch (e) {
                         reject(m)
@@ -523,7 +531,7 @@ function ledger_accept(n)
                     n = 1;
                 for (let i = 0; i < n; ++i)
                 {
-                    if (i % 64 == 0)
+                    if (debug && i % 64 == 0)
                         console.log("ledger_accept ... ", i)
                     ws.send('{"command":"ledger_accept"}');
                 }
@@ -631,8 +639,9 @@ console.log(`
 
 function produce_cases(indent_level, cases, namespace, counter = 0, should_succeed = true)
 {
+    //for (let i = 0; i < 2; ++i)
+    let i = 0;
     for (let x in cases)
-    for (let i = 0; i < 2; ++i)
     {
         console.log(spacer.repeat(indent_level) + '/* ' + namespace + ' test ' + counter + ' [' + cases[x] + ']')
         console.log(human_readable(indent_level, cases[x]) + ' run=' + (i+1) + '/ */')
@@ -657,7 +666,7 @@ function produce_cases(indent_level, cases, namespace, counter = 0, should_succe
 }
 
 
-counter = produce_cases(4, [positive_cases[0]], "positive", 0, true);
+counter = produce_cases(4, positive_cases.slice(0,10), "positive", 0, true);
 //produce_cases(negative_cases, "negative", counter, false);
 console.log(spacer.repeat(4) + 'return false;')
 console.log(spacer.repeat(3) + '}')
