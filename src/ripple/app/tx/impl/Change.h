@@ -60,6 +60,11 @@ private:
     applyAmendment();
 
     TER
+    setFee(
+        std::optional<uint64_t> baseFee, std::optional<uint32_t> referenceFeeUnits,
+        std::optional<uint32_t> reserveBase, std::optional<uint32_t> reserveIncrement);
+
+    TER
     applyFee();
 
     TER

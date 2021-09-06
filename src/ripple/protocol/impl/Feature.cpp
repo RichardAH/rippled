@@ -137,6 +137,7 @@ detail::supportedAmendments()
         "fixSTAmountCanonicalize",
         "fixRmSmallIncreasedQOffers",
         "CheckCashMakesTrustLine",
+        "OneXRP",
     };
     return supported;
 }
@@ -194,7 +195,8 @@ uint256 const
     featureFlowSortStrands          = *getRegisteredFeature("FlowSortStrands"),
     fixSTAmountCanonicalize         = *getRegisteredFeature("fixSTAmountCanonicalize"),
     fixRmSmallIncreasedQOffers      = *getRegisteredFeature("fixRmSmallIncreasedQOffers"),
-    featureCheckCashMakesTrustLine  = *getRegisteredFeature("CheckCashMakesTrustLine");
+    featureCheckCashMakesTrustLine  = *getRegisteredFeature("CheckCashMakesTrustLine"),
+    featureOneXRP                   = *getRegisteredFeature("OneXRP");
 
 // The following amendments have been active for at least two years. Their
 // pre-amendment code has been removed and the identifiers are deprecated.

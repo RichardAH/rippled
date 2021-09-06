@@ -204,6 +204,10 @@ Change::applyAmendment()
                              << " activated: server blocked.";
             ctx_.app.getOPs().setAmendmentBlocked();
         }
+
+        // apply any one-off amendments here
+        if (amendment == *getRegisteredFeature("OneXRP"))
+            setFee(std::nullopt, std::nullopt, 1'000'000, 1'000'000);
     }
 
     if (newMajorities.empty())
@@ -216,9 +220,15 @@ Change::applyAmendment()
     return tesSUCCESS;
 }
 
+
 TER
-Change::applyFee()
+Change::setFee(
+        std::optional<uint64_t> baseFee, std::optional<uint32_t> referenceFeeUnits,
+        std::optional<uint32_t> reserveBase, std::optional<uint32_t> reserveIncrement)
 {
+    if (!baseFee && !reserveBase && !referenceFeeUnits && !reserveIncrement)
+        return tesSUCCESS;
+
     auto const k = keylet::fees();
 
     SLE::pointer feeObject = view().peek(k);
@@ -229,17 +239,28 @@ Change::applyFee()
         view().insert(feeObject);
     }
 
-    feeObject->setFieldU64(sfBaseFee, ctx_.tx.getFieldU64(sfBaseFee));
-    feeObject->setFieldU32(
-        sfReferenceFeeUnits, ctx_.tx.getFieldU32(sfReferenceFeeUnits));
-    feeObject->setFieldU32(sfReserveBase, ctx_.tx.getFieldU32(sfReserveBase));
-    feeObject->setFieldU32(
-        sfReserveIncrement, ctx_.tx.getFieldU32(sfReserveIncrement));
+    if (baseFee)
+        feeObject->setFieldU64(sfBaseFee, *baseFee);
+    if (referenceFeeUnits)
+        feeObject->setFieldU32(sfReferenceFeeUnits, *referenceFeeUnits);
+    if (reserveBase)
+        feeObject->setFieldU32(sfReserveBase, *reserveBase);
+    if (reserveIncrement)
+        feeObject->setFieldU32(sfReserveIncrement, *reserveIncrement);
 
     view().update(feeObject);
 
     JLOG(j_.warn()) << "Fees have been changed";
+
     return tesSUCCESS;
+}
+
+TER
+Change::applyFee()
+{
+    return setFee(ctx_.tx.getFieldU64(sfBaseFee), ctx_.tx.getFieldU32(sfReferenceFeeUnits),
+            ctx_.tx.getFieldU32(sfReserveBase), ctx_.tx.getFieldU32(sfReserveIncrement));
+
 }
 
 TER
