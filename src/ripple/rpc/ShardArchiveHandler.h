@@ -60,7 +60,7 @@ public:
     static std::unique_ptr<ShardArchiveHandler>
     tryMakeRecoveryHandler(Application& app);
 
-    ShardArchiveHandler(Application& app);
+    explicit ShardArchiveHandler(Application& app);
 
     virtual ~ShardArchiveHandler() = default;
 
@@ -167,7 +167,7 @@ private:
 class RecoveryHandler : public ShardArchiveHandler
 {
 public:
-    RecoveryHandler(Application& app);
+    explicit RecoveryHandler(Application& app);
 };
 
 }  // namespace RPC

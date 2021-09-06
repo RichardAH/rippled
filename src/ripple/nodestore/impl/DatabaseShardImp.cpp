@@ -970,7 +970,8 @@ DatabaseShardImp::doImportDatabase()
             if (isStopping())
                 return;
 
-            auto const ledger{loadByIndex(*ledgerSeq, app_, false)};
+            // Not const so it may be moved later
+            auto ledger{loadByIndex(*ledgerSeq, app_, false)};
             if (!ledger || ledger->info().seq != ledgerSeq)
                 break;
 
@@ -1300,7 +1301,7 @@ DatabaseShardImp::initConfig(std::lock_guard<std::mutex> const&)
     }
 
     // NuDB is the default and only supported permanent storage backend
-    backendName_ = get<std::string>(section, "type", "nudb");
+    backendName_ = get(section, "type", "nudb");
     if (!boost::iequals(backendName_, "NuDB"))
         return fail("'type' value unsupported");
 
