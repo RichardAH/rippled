@@ -36,6 +36,10 @@ struct VisitData
     AccountID const& accountID;
     bool hasPeer;
     AccountID const& raPeerAccount;
+
+    bool ignoreDefault;
+    uint32_t foundCount;
+    RippleState::pointer lastFound;
 };
 
 void
@@ -78,6 +82,7 @@ addLine(Json::Value& jsonLines, RippleState const& line)
 //   ledger_index : <ledger_index>
 //   limit: integer                 // optional
 //   marker: opaque                 // optional, resume previous query
+//   ignore_default: bool           // do not return lines in default state (on this account's side)
 // }
 Json::Value
 doAccountLines(RPC::JsonContext& context)
@@ -85,6 +90,7 @@ doAccountLines(RPC::JsonContext& context)
     auto const& params(context.params);
     if (!params.isMember(jss::account))
         return RPC::missing_field_error(jss::account);
+
 
     std::shared_ptr<ReadView const> ledger;
     auto result = RPC::lookupLedger(ledger, context);
@@ -103,6 +109,7 @@ doAccountLines(RPC::JsonContext& context)
 
     if (!ledger->exists(keylet::account(accountID)))
         return rpcError(rpcACT_NOT_FOUND);
+
 
     std::string strPeer;
     if (params.isMember(jss::peer))
@@ -124,8 +131,11 @@ doAccountLines(RPC::JsonContext& context)
     if (auto err = readLimitField(limit, RPC::Tuning::accountLines, context))
         return *err;
 
+    // this flag allows the requester to ask incoming trustlines in default state be omitted
+    bool ignoreDefault = params.isMember(jss::ignore_default);
+    
     Json::Value& jsonLines(result[jss::lines] = Json::arrayValue);
-    VisitData visitData = {{}, accountID, hasPeer, raPeerAccount};
+    VisitData visitData = {{}, accountID, hasPeer, raPeerAccount, ignoreDefault, 0, nullptr};
     unsigned int reserve(limit);
     uint256 startAfter;
     std::uint64_t startHint;
@@ -147,20 +157,38 @@ doAccountLines(RPC::JsonContext& context)
         if (!sleLine)
             return rpcError(rpcINVALID_PARAMS);
 
+        bool isDefault = false;
         if (sleLine->getFieldAmount(sfLowLimit).getIssuer() == accountID)
+        {
             startHint = sleLine->getFieldU64(sfLowNode);
+            isDefault = !(sleLine->getFieldU32(sfFlags) & lsfLowReserve);
+        }
         else if (sleLine->getFieldAmount(sfHighLimit).getIssuer() == accountID)
+        {
             startHint = sleLine->getFieldU64(sfHighNode);
+            isDefault = !(sleLine->getFieldU32(sfFlags) & lsfHighReserve);
+        }
         else
             return rpcError(rpcINVALID_PARAMS);
 
         // Caller provided the first line (startAfter), add it as first result
-        auto const line = RippleState::makeItem(accountID, sleLine);
-        if (line == nullptr)
-            return rpcError(rpcINVALID_PARAMS);
+        // (but only if it meets inclusion criteria)
 
-        addLine(jsonLines, *line);
-        visitData.items.reserve(reserve);
+        if (isDefault && ignoreDefault)
+        {
+            // even though we're starting our search here we don't include the first entry
+            // in this edge case
+            visitData.items.reserve(++reserve);
+        }
+        else
+        {
+            auto const line = RippleState::makeItem(accountID, sleLine);
+            if (line == nullptr)
+                return rpcError(rpcINVALID_PARAMS);
+
+            addLine(jsonLines, *line);
+            visitData.items.reserve(reserve);
+        }
     }
     else
     {
@@ -177,13 +205,28 @@ doAccountLines(RPC::JsonContext& context)
                 startHint,
                 reserve,
                 [&visitData](std::shared_ptr<SLE const> const& sleCur) {
+
+                    bool ignore = false;
+                    if (visitData.ignoreDefault)
+                    {
+                        if (sleCur->getFieldAmount(sfLowLimit).getIssuer() == visitData.accountID)
+                            ignore = !(sleCur->getFieldU32(sfFlags) & lsfLowReserve);
+                        else 
+                            ignore = !(sleCur->getFieldU32(sfFlags) & lsfHighReserve);
+                    }
+
                     auto const line =
                         RippleState::makeItem(visitData.accountID, sleCur);
                     if (line != nullptr &&
                         (!visitData.hasPeer ||
                          visitData.raPeerAccount == line->getAccountIDPeer()))
                     {
-                        visitData.items.emplace_back(line);
+                        if (!ignore)
+                            visitData.items.emplace_back(line);
+                        
+                        visitData.lastFound = line;
+                        visitData.foundCount++;
+
                         return true;
                     }
 
@@ -194,13 +237,15 @@ doAccountLines(RPC::JsonContext& context)
         }
     }
 
-    if (visitData.items.size() == reserve)
+    if (visitData.items.size() == reserve || 
+        visitData.foundCount >= reserve)
     {
         result[jss::limit] = limit;
 
-        RippleState::pointer line(visitData.items.back());
+        RippleState::pointer line(visitData.lastFound);
         result[jss::marker] = to_string(line->key());
-        visitData.items.pop_back();
+        if (visitData.items.back() == visitData.lastFound)
+            visitData.items.pop_back();
     }
 
     result[jss::account] = context.app.accountIDCache().toBase58(accountID);
