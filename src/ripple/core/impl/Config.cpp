@@ -627,8 +627,23 @@ Config::loadFromString(std::string const& fileContents)
     if (getSingleSection(secConfig, SECTION_DEBUG_LOGFILE, strTemp, j_))
         DEBUG_LOGFILE = strTemp;
 
+    if (getSingleSection(secConfig, SECTION_SWEEP_INTERVAL, strTemp, j_))
+    {
+        SWEEP_INTERVAL = beast::lexicalCastThrow<std::size_t>(strTemp);
+
+        if (SWEEP_INTERVAL < 10 || SWEEP_INTERVAL > 600)
+            Throw<std::runtime_error>("Invalid " SECTION_SWEEP_INTERVAL
+                                      ": must be between 10 and 600 inclusive");
+    }
+
     if (getSingleSection(secConfig, SECTION_WORKERS, strTemp, j_))
-        WORKERS = beast::lexicalCastThrow<std::size_t>(strTemp);
+    {
+        WORKERS = beast::lexicalCastThrow<int>(strTemp);
+
+        if (WORKERS < 1 || WORKERS > 128)
+            Throw<std::runtime_error>("Invalid " SECTION_WORKERS
+                                      ": must be between 1 and 128 inclusive.");
+    }
 
     if (getSingleSection(secConfig, SECTION_COMPRESSION, strTemp, j_))
         COMPRESSION = beast::lexicalCastThrow<bool>(strTemp);

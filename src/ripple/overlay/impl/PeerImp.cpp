@@ -603,7 +603,7 @@ PeerImp::fail(std::string const& reason)
         return post(
             strand_,
             std::bind(
-                (void (Peer::*)(std::string const&)) & PeerImp::fail,
+                (void(Peer::*)(std::string const&)) & PeerImp::fail,
                 shared_from_this(),
                 reason));
     if (journal_.active(beast::severities::kWarning) && socket_.is_open())
@@ -1853,19 +1853,19 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMLedgerData> const& m)
     if (m->type() < protocol::liBASE || m->type() > protocol::liTS_CANDIDATE)
         return badData("Invalid ledger info type");
 
-    // Verify ledger nodes
-    if (m->nodes_size() <= 0 || m->nodes_size() > Tuning::maxReplyNodes)
-    {
-        return badData(
-            "Invalid Ledger/TXset nodes " + std::to_string(m->nodes_size()));
-    }
-
     // Verify reply error
     if (m->has_error() &&
         (m->error() < protocol::reNO_LEDGER ||
          m->error() > protocol::reBAD_REQUEST))
     {
         return badData("Invalid reply error");
+    }
+
+    // Verify ledger nodes.
+    if (m->nodes_size() <= 0 || m->nodes_size() > Tuning::hardMaxReplyNodes)
+    {
+        return badData(
+            "Invalid Ledger/TXset nodes " + std::to_string(m->nodes_size()));
     }
 
     // If there is a request cookie, attempt to relay the message
@@ -3503,7 +3503,7 @@ PeerImp::processLedgerRequest(std::shared_ptr<protocol::TMGetLedger> const& m)
         std::vector<Blob> rawNodes;
 
         for (int i = 0; i < m->nodeids_size() &&
-             ledgerData.nodes_size() < Tuning::maxReplyNodes;
+             ledgerData.nodes_size() < Tuning::softMaxReplyNodes;
              ++i)
         {
             auto const shaMapNodeId{deserializeSHAMapNodeID(m->nodeids(i))};

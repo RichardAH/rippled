@@ -30,6 +30,7 @@
 #include <ripple/protocol/jss.h>
 #include <memory>
 #include <mutex>
+#include <stack>
 
 namespace ripple {
 
@@ -350,13 +351,13 @@ public:
         clock_type::time_point const now(m_clock.now());
 
         // Make a list of things to sweep, while holding the lock
-        std::vector<MapType::mapped_type> stuffToSweep;
+        std::stack<MapType::mapped_type> stuffToSweep;
         std::size_t total;
+        auto const start = std::chrono::steady_clock::now();
         {
             ScopedLockType sl(mLock);
             MapType::iterator it(mLedgers.begin());
             total = mLedgers.size();
-            stuffToSweep.reserve(total);
 
             while (it != mLedgers.end())
             {
@@ -369,7 +370,7 @@ public:
                     (it->second->getLastAction() + std::chrono::minutes(1)) <
                     now)
                 {
-                    stuffToSweep.push_back(it->second);
+                    stuffToSweep.push(it->second);
                     // shouldn't cause the actual final delete
                     // since we are holding a reference in the vector.
                     it = mLedgers.erase(it);
@@ -383,8 +384,10 @@ public:
             beast::expire(mRecentFailures, kReacquireInterval);
         }
 
-        JLOG(j_.debug()) << "Swept " << stuffToSweep.size() << " out of "
-                         << total << " inbound ledgers.";
+        JLOG(j_.debug()) << "InboundLedgers sweep lock duration "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() << "ms"
+                << ". Swept " << stuffToSweep.size() << " out of "
+                << total << " inbound ledgers.";
     }
 
     void
