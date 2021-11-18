@@ -71,7 +71,9 @@ seconds_clock_thread::seconds_clock_thread() : stop_{false}, tp_{Clock::now()}
 seconds_clock_thread::Clock::time_point
 seconds_clock_thread::now()
 {
+#ifdef PEDANTIC_LOCKING
     std::lock_guard lock(mut_);
+#endif
     return tp_;
 }
 

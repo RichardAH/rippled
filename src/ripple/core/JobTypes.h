@@ -75,7 +75,7 @@ private:
         add(jtLEDGER_REQ,    "ledgerRequest",                 5,     0ms,     0ms);
         add(jtPROPOSAL_ut,   "untrustedProposal",      maxLimit,   500ms,  1250ms);
         add(jtREPLAY_TASK,   "ledgerReplayTask",       maxLimit,     0ms,     0ms);
-        add(jtLEDGER_DATA,   "ledgerData",                    5,     0ms,     0ms);
+        add(jtLEDGER_DATA,   "ledgerData",             maxLimit,     0ms,     0ms);
         add(jtCLIENT,        "clientCommand",          maxLimit,  2000ms,  5000ms);
         add(jtRPC,           "RPC",                    maxLimit,     0ms,     0ms);
         add(jtUPDATE_PF,     "updatePaths",                   1,     0ms,     0ms);
@@ -83,7 +83,7 @@ private:
         add(jtBATCH,         "batch",                  maxLimit,   250ms,  1000ms);
         add(jtADVANCE,       "advanceLedger",          maxLimit,     0ms,     0ms);
         add(jtPUBLEDGER,     "publishNewLedger",       maxLimit,  3000ms,  4500ms);
-        add(jtTXN_DATA,      "fetchTxnData",                  5,     0ms,     0ms);
+        add(jtTXN_DATA,      "fetchTxnData",           maxLimit,     0ms,     0ms);
         add(jtWAL,           "writeAhead",             maxLimit,  1000ms,  2500ms);
         add(jtVALIDATION_t,  "trustedValidation",      maxLimit,   500ms,  1500ms);
         add(jtWRITE,         "writeObjects",           maxLimit,  1750ms,  2500ms);

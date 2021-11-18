@@ -253,8 +253,8 @@ public:
         if ((cores == 1) || ((config.NODE_SIZE == 0) && (cores == 2)))
             return 1;
 
-        // Otherwise, prefer two threads.
-        return 2;
+        // Otherwise, prefer four threads.
+        return 4;
 #endif
     }
 
@@ -300,9 +300,9 @@ public:
                   // for the job queue if the server is configured as "large"
                   // or "huge".
                   if (config_->NODE_SIZE >= 3)
-                      count = 4 + std::min(count, 8);
+                      count = 4 + std::min(count, 16);
                   else
-                      count = 2 + std::min(count, 4);
+                      count = 2 + std::min(count, 8);
 
                   JLOG(m_journal.info())
                       << "Automatically tuned for " << count << " threads";
@@ -341,7 +341,7 @@ public:
               m_collectorManager->collector(),
               logs_->journal("Resource")))
 
-        , m_nodeStore(m_shaMapStore->makeNodeStore(4))
+        , m_nodeStore(m_shaMapStore->makeNodeStore(8))
 
         , nodeFamily_(*this, *m_collectorManager)
 
