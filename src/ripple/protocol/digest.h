@@ -25,6 +25,7 @@
 #include <boost/endian/conversion.hpp>
 #include <algorithm>
 #include <array>
+#include "ripple/beast/hash/xxhasher.h"
 
 namespace ripple {
 
@@ -210,15 +211,155 @@ using sha512_half_hasher_s = detail::basic_sha512_half_hasher<true>;
 
 //------------------------------------------------------------------------------
 
+
+class xorhasher
+{
+private:
+    // requires 64-bit std::size_t
+    static_assert(sizeof(std::size_t) == 8, "");
+
+
+    size_t size_ = 0;
+    size_t hash_ = 0;
+    
+
+public:
+    using result_type = std::size_t;
+
+    static constexpr auto const endian = boost::endian::order::native;
+
+    explicit xorhasher(uint64_t seed)
+    {
+        hash_ = seed;
+    }
+    void
+    operator()(void const* key, std::size_t len) noexcept
+    {
+        int i = 0;
+        for (i = 0; i < len; i+= 8)
+            hash_ ^= *(reinterpret_cast<const uint64_t*>(key + i));
+
+        for (; i < len; ++i)
+        {
+            hash_ ^= *(reinterpret_cast<const uint8_t*>(key + i));
+            hash_ = (hash_ >> 8U) | (hash_ << 56U);
+        }
+
+        hash_ = (hash_ >> 8U) | (hash_ << 56U);
+        hash_ ++;
+
+        size_ += len;
+    }
+
+    size_t get_hash() noexcept
+    {
+        return hash_;
+    }
+
+    size_t get_size() noexcept
+    {
+        return size_;
+    }
+
+};
+
+
+//#define DEBUG_CACHE 1
+
 /** Returns the SHA512-Half of a series of objects. */
 template <class... Args>
 sha512_half_hasher::result_type
 sha512Half(Args const&... args)
 {
-    sha512_half_hasher h;
     using beast::hash_append;
+
+    static thread_local uint64_t miss_count = 0;
+    static thread_local uint64_t total_count = 0;
+    static thread_local std::unordered_map<size_t, uint256> seen { 0x100000U };
+    static thread_local uint64_t thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
+
+    double rate = (100.0f - (((double)(miss_count))/((double)(total_count))*100.0f));
+
+    total_count++;
+
+    if (total_count > 10000U && rate < 5.0f)
+    {
+        // skip caching altogether this thread doesn't need benefit from it
+        sha512_half_hasher h;
+        hash_append(h, args...);
+        return static_cast<typename sha512_half_hasher::result_type>(h);
+    }
+
+    // otherwise continue and do a cache lookup and possibly a cache write
+
+#ifdef DEBUG_CACHE
+    uint64_t dur1 = 0, dur2 = 0;
+    {
+        unsigned int lo,hi;
+        __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+        dur1 = ((uint64_t)hi << 32) | lo;
+    }
+#endif
+
+    xorhasher x { thread_id };
+    hash_append(x, args...);
+    size_t cache_id = x.get_hash();
+    size_t size = x.get_size();
+
+    bool cache_hit = 
+            seen.find(cache_id) != seen.end();
+#ifdef DEBUG_CACHE
+    {
+        unsigned int lo,hi;
+        __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+
+        dur2 = ((uint64_t)hi << 32) | lo;
+        dur1 = dur2 - dur1;
+    }
+#endif
+
+    if (cache_hit)
+    {
+
+#ifdef DEBUG_CACHE    
+        printf(
+                "thread=%llX\tHIT  : sha512h "
+                "cycles {sha=%llu\txx=%llu}\t\tsize=%llu\tcache_hits=%02.02g%%\tcache_id=%llx\n",
+                thread_id,
+                0, dur1,
+                size, rate,
+                cache_id);
+#endif        
+        return seen[cache_id];
+    }
+
+    miss_count++;
+    sha512_half_hasher h;
     hash_append(h, args...);
-    return static_cast<typename sha512_half_hasher::result_type>(h);
+    auto r = static_cast<typename sha512_half_hasher::result_type>(h);
+    
+#ifdef DEBUG_CACHE    
+    {
+        unsigned int lo,hi;
+        __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+        dur2 = (((uint64_t)hi << 32) | lo) - dur2;
+    }
+    printf(
+            "thread=%llX\tMISS : sha512h "
+            "cycles {sha=%llu\txx=%llu}\t\tsize=%llu\tcache_hits=%02.02g%%\tcache_id=%llx\n",
+            thread_id,
+            dur2, dur1, 
+            size, rate,
+            cache_id);
+#endif
+
+    // prune the map when it gets too big
+    if (seen.size() >= 0x100000U)
+        seen.erase(seen.begin());
+
+    seen.emplace(cache_id, r);
+
+    return r;
 }
 
 /** Returns the SHA512-Half of a series of objects.
