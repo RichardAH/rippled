@@ -265,6 +265,10 @@ public:
 
 
 //#define DEBUG_CACHE 1
+#define CACHE_BUCKET_COUNT 0x100000U  // size of the cache
+#define CACHE_THRESHOLD_COUNT 10000U  // the number of times sha512h needs to be called on this thread before stats
+                                      // about effectiveness can be computed
+#define CACHE_THRESHOLD_RATE 5.0f     // if the % of hits falls below this value [0 - 100] then skip cache altogether
 
 /** Returns the SHA512-Half of a series of objects. */
 template <class... Args>
@@ -275,14 +279,18 @@ sha512Half(Args const&... args)
 
     static thread_local uint64_t miss_count = 0;
     static thread_local uint64_t total_count = 0;
-    static thread_local std::unordered_map<size_t, uint256> seen { 0x100000U };
+    static thread_local std::unordered_map<size_t, uint256> seen { CACHE_BUCKET_COUNT };
     static thread_local uint64_t thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
 
     double rate = (100.0f - (((double)(miss_count))/((double)(total_count))*100.0f));
 
+
+    if (total_count % 1000 == 999)
+        printf("Cache performance. Thread ID = %llu, Hit rate = %g%%\n", thread_id, rate);
+
     total_count++;
 
-    if (total_count > 10000U && rate < 5.0f)
+    if (total_count > CACHE_THRESHOLD_COUNT && rate < CACHE_THRESHOLD_RATE)
     {
         // skip caching altogether this thread doesn't need benefit from it
         sha512_half_hasher h;
@@ -354,7 +362,7 @@ sha512Half(Args const&... args)
 #endif
 
     // prune the map when it gets too big
-    if (seen.size() >= 0x100000U)
+    if (seen.size() >= CACHE_BUCKET_COUNT)
         seen.erase(seen.begin());
 
     seen.emplace(cache_id, r);
