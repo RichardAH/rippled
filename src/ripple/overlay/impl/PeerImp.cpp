@@ -1523,6 +1523,7 @@ PeerImp::handleTransaction(
     if (tracking_.load() == Tracking::diverged)
         return;
 
+    /*
     if (app_.getOPs().isNeedNetworkLedger())
     {
         // If we've never been in synch, there's nothing we can do
@@ -1530,7 +1531,7 @@ PeerImp::handleTransaction(
         JLOG(p_journal_.debug()) << "Ignoring incoming transaction: "
                                  << "Need network ledger";
         return;
-    }
+    }*/
 
     SerialIter sit(makeSlice(m->rawtransaction()));
 
