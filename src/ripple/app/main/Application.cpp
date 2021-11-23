@@ -267,7 +267,8 @@ public:
     ApplicationImp(
         std::unique_ptr<Config> config,
         std::unique_ptr<Logs> logs,
-        std::unique_ptr<TimeKeeper> timeKeeper)
+        std::unique_ptr<TimeKeeper> timeKeeper,
+        std::optional<uint256> cmdlineLCL)
         : BasicApp(numberOfThreads(*config))
         , config_(std::move(config))
         , logs_(std::move(logs))
@@ -454,6 +455,7 @@ public:
         , mValidations(
               ValidationParms(),
               stopwatch(),
+              cmdlineLCL,
               *this,
               logs_->journal("Validations"))
 
@@ -2172,10 +2174,11 @@ std::unique_ptr<Application>
 make_Application(
     std::unique_ptr<Config> config,
     std::unique_ptr<Logs> logs,
-    std::unique_ptr<TimeKeeper> timeKeeper)
+    std::unique_ptr<TimeKeeper> timeKeeper,
+    std::optional<uint256> cmdlineLCL)
 {
     return std::make_unique<ApplicationImp>(
-        std::move(config), std::move(logs), std::move(timeKeeper));
+        std::move(config), std::move(logs), std::move(timeKeeper), cmdlineLCL);
 }
 
 }  // namespace ripple

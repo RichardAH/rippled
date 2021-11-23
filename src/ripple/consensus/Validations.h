@@ -296,6 +296,7 @@ class Validations
     using WrappedValidationType = std::decay_t<
         std::result_of_t<decltype (&Validation::unwrap)(Validation)>>;
 
+
     // Manages concurrent access to members
     mutable Mutex mutex_;
 
@@ -558,6 +559,8 @@ private:
                 f(key, val);
         }
     }
+    
+    std::optional<uint256> cmdlineLCL_;
 
 public:
     /** Constructor
@@ -570,13 +573,14 @@ public:
     Validations(
         ValidationParms const& p,
         beast::abstract_clock<std::chrono::steady_clock>& c,
+        std::optional<uint256> cmdlineLCL,
         Ts&&... ts)
         : byLedger_(c)
         , bySequence_(c)
+        , cmdlineLCL_(cmdlineLCL)
         , parms_(p)
         , adaptor_(std::forward<Ts>(ts)...)
-    {
-    }
+    {}
 
     /** Return the adaptor instance
      */
@@ -940,17 +944,15 @@ public:
         if (preferred)
             return (preferred->first >= minSeq) ? preferred->second : lcl.id();
 
-        // Otherwise, rely on peer ledgers
-        auto it = std::max_element(
-            peerCounts.begin(), peerCounts.end(), [](auto& a, auto& b) {
-                // Prefer larger counts, then larger ids on ties
-                // (max_element expects this to return true if a < b)
-                return std::tie(a.second, a.first) <
-                    std::tie(b.second, b.first);
-            });
+        // if a commandline lcl is specified then it is the preferred lcl but
+        // only the first time getPreferredLCL is called
+        if (cmdlineLCL_)
+        {
+            uint256 lcl = *cmdlineLCL_;
+            cmdlineLCL_.reset();
+            return lcl;
+        }
 
-        if (it != peerCounts.end())
-            return it->first;
         return lcl.id();
     }
 

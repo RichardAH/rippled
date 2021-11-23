@@ -364,8 +364,12 @@ run(int argc, char** argv)
     // Set up option parsing.
     //
     po::options_description gen("General Options");
-    gen.add_options()(
-        "conf", po::value<std::string>(), "Specify the configuration file.")(
+    gen.add_options()
+        (
+        "conf", po::value<std::string>(), "Specify the configuration file.")
+        (
+        "lcl", po::value<std::string>(), "Specify the LCL to start from.")
+        (
         "debug", "Enable normally suppressed debug logging")(
         "help,h", "Display this message.")(
         "quorum",
@@ -573,6 +577,16 @@ run(int argc, char** argv)
         bool(vm.count("silent")),
         bool(vm.count("standalone")));
 
+    std::optional<uint256> cmdlineLCL;
+    if (vm.count("lcl"))
+    {
+        std::string lclstr {vm["lcl"].as<std::string>()};
+        cmdlineLCL = uint256{std::string_view{lclstr}};
+
+        std::cout << "Cmdline LCL: " << *cmdlineLCL << " specified.\n";
+    }
+            
+
     if (vm.count("vacuum"))
     {
         if (config->standalone())
@@ -750,7 +764,7 @@ run(int argc, char** argv)
         auto timeKeeper = make_TimeKeeper(logs->journal("TimeKeeper"));
 
         auto app = make_Application(
-            std::move(config), std::move(logs), std::move(timeKeeper));
+            std::move(config), std::move(logs), std::move(timeKeeper), cmdlineLCL);
 
         if (!app->setup())
             return -1;
