@@ -97,7 +97,7 @@ class NetworkOPsImp final : public NetworkOPs
             bool a,
             bool l,
             FailHard f)
-            : transaction(t), admin(a), local(l), failType(f)
+            : transaction(std::move(t)), admin(a), local(l), failType(f)
         {
             assert(local || failType == FailHard::no);
         }
@@ -247,6 +247,7 @@ public:
               validatorKeys,
               app_.logs().journal("LedgerConsensus"))
         , m_ledgerMaster(ledgerMaster)
+        , streamMaps_{sLedger, sManifests, sServer, sTransactions, sRTTransactions, sValidations, sPeerStatus, sConsensusPhase}
         , m_job_queue(job_queue)
         , m_standalone(standalone)
         , minPeerCount_(start_valid ? 0 : minPeerCount)
@@ -638,8 +639,6 @@ private:
 
 private:
     using SubMapType = hash_map<std::uint64_t, InfoSub::wptr>;
-    using SubInfoMapType = hash_map<AccountID, SubMapType>;
-    using subRpcMapType = hash_map<std::string, InfoSub::pointer>;
 
     /*
      * With a validated ledger to separate history and future, the node
@@ -723,10 +722,9 @@ private:
 
     LedgerMaster& m_ledgerMaster;
 
-    SubInfoMapType mSubAccount;
-    SubInfoMapType mSubRTAccount;
-
-    subRpcMapType mRpcSubMap;
+    hash_map<AccountID, SubMapType> mSubAccount;
+    hash_map<AccountID, SubMapType> mSubRTAccount;
+    hash_map<std::string, InfoSub::pointer> mRpcSubMap;
 
     SubAccountHistoryMapType mSubAccountHistory;
 
@@ -743,7 +741,19 @@ private:
         sLastEntry = sConsensusPhase  // as this name implies, any new entry
                                       // must be ADDED ABOVE this one
     };
-    std::array<SubMapType, SubTypes::sLastEntry + 1> mStreamMaps;
+
+    struct Subscriptions
+    {
+        SubTypes const type;
+        std::recursive_mutex mutable lock;
+        SubMapType map;
+
+        Subscriptions(SubTypes t) : type(t)
+        {
+        }
+    };
+
+    std::array<Subscriptions, SubTypes::sLastEntry + 1> streamMaps_;
 
     ServerFeeSummary mLastFeeSummary;
 
@@ -1930,9 +1940,9 @@ void
 NetworkOPsImp::pubManifest(Manifest const& mo)
 {
     // VFALCO consider std::shared_mutex
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sManifests].lock);
 
-    if (!mStreamMaps[sManifests].empty())
+    if (!streamMaps_[sManifests].map.empty())
     {
         Json::Value jvObj(Json::objectValue);
 
@@ -1949,8 +1959,8 @@ NetworkOPsImp::pubManifest(Manifest const& mo)
             jvObj[jss::domain] = mo.domain;
         jvObj[jss::manifest] = strHex(mo.serialized);
 
-        for (auto i = mStreamMaps[sManifests].begin();
-             i != mStreamMaps[sManifests].end();)
+        for (auto i = streamMaps_[sManifests].map.begin();
+             i != streamMaps_[sManifests].map.end();)
         {
             if (auto p = i->second.lock())
             {
@@ -1959,7 +1969,7 @@ NetworkOPsImp::pubManifest(Manifest const& mo)
             }
             else
             {
-                i = mStreamMaps[sManifests].erase(i);
+                i = streamMaps_[sManifests].map.erase(i);
             }
         }
     }
@@ -2012,63 +2022,63 @@ NetworkOPsImp::pubServer()
     //             list into a local array while holding the lock then release
     //             the lock and call send on everyone.
     //
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sServer].lock);
 
-    if (!mStreamMaps[sServer].empty())
+    if (streamMaps_[sServer].map.empty())
+        return;
+
+    Json::Value jvObj(Json::objectValue);
+
+    ServerFeeSummary f{
+        app_.openLedger().current()->fees().base,
+        app_.getTxQ().getMetrics(*app_.openLedger().current()),
+        app_.getFeeTrack()};
+
+    jvObj[jss::type] = "serverStatus";
+    jvObj[jss::server_status] = strOperatingMode();
+    jvObj[jss::load_base] = f.loadBaseServer;
+    jvObj[jss::load_factor_server] = f.loadFactorServer;
+    jvObj[jss::base_fee] = f.baseFee.jsonClipped();
+
+    if (f.em)
     {
-        Json::Value jvObj(Json::objectValue);
+        auto const loadFactor = std::max(
+            safe_cast<std::uint64_t>(f.loadFactorServer),
+            mulDiv(
+                f.em->openLedgerFeeLevel,
+                f.loadBaseServer,
+                f.em->referenceFeeLevel)
+                .second);
 
-        ServerFeeSummary f{
-            app_.openLedger().current()->fees().base,
-            app_.getTxQ().getMetrics(*app_.openLedger().current()),
-            app_.getFeeTrack()};
+        jvObj[jss::load_factor] = trunc32(loadFactor);
+        jvObj[jss::load_factor_fee_escalation] =
+            f.em->openLedgerFeeLevel.jsonClipped();
+        jvObj[jss::load_factor_fee_queue] =
+            f.em->minProcessingFeeLevel.jsonClipped();
+        jvObj[jss::load_factor_fee_reference] =
+            f.em->referenceFeeLevel.jsonClipped();
+    }
+    else
+        jvObj[jss::load_factor] = f.loadFactorServer;
 
-        jvObj[jss::type] = "serverStatus";
-        jvObj[jss::server_status] = strOperatingMode();
-        jvObj[jss::load_base] = f.loadBaseServer;
-        jvObj[jss::load_factor_server] = f.loadFactorServer;
-        jvObj[jss::base_fee] = f.baseFee.jsonClipped();
+    mLastFeeSummary = f;
 
-        if (f.em)
+    for (auto i = streamMaps_[sServer].map.begin();
+         i != streamMaps_[sServer].map.end();)
+    {
+        InfoSub::pointer p = i->second.lock();
+
+        // VFALCO TODO research the possibility of using thread queues and
+        //             linearizing the deletion of subscribers with the
+        //             sending of JSON data.
+        if (p)
         {
-            auto const loadFactor = std::max(
-                safe_cast<std::uint64_t>(f.loadFactorServer),
-                mulDiv(
-                    f.em->openLedgerFeeLevel,
-                    f.loadBaseServer,
-                    f.em->referenceFeeLevel)
-                    .second);
-
-            jvObj[jss::load_factor] = trunc32(loadFactor);
-            jvObj[jss::load_factor_fee_escalation] =
-                f.em->openLedgerFeeLevel.jsonClipped();
-            jvObj[jss::load_factor_fee_queue] =
-                f.em->minProcessingFeeLevel.jsonClipped();
-            jvObj[jss::load_factor_fee_reference] =
-                f.em->referenceFeeLevel.jsonClipped();
+            p->send(jvObj, true);
+            ++i;
         }
         else
-            jvObj[jss::load_factor] = f.loadFactorServer;
-
-        mLastFeeSummary = f;
-
-        for (auto i = mStreamMaps[sServer].begin();
-             i != mStreamMaps[sServer].end();)
         {
-            InfoSub::pointer p = i->second.lock();
-
-            // VFALCO TODO research the possibility of using thread queues and
-            //             linearizing the deletion of subscribers with the
-            //             sending of JSON data.
-            if (p)
-            {
-                p->send(jvObj, true);
-                ++i;
-            }
-            else
-            {
-                i = mStreamMaps[sServer].erase(i);
-            }
+            i = streamMaps_[sServer].map.erase(i);
         }
     }
 }
@@ -2076,9 +2086,9 @@ NetworkOPsImp::pubServer()
 void
 NetworkOPsImp::pubConsensus(ConsensusPhase phase)
 {
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sConsensusPhase].lock);
 
-    auto& streamMap = mStreamMaps[sConsensusPhase];
+    auto& streamMap = streamMaps_[sConsensusPhase].map;
     if (!streamMap.empty())
     {
         Json::Value jvObj(Json::objectValue);
@@ -2104,76 +2114,75 @@ void
 NetworkOPsImp::pubValidation(std::shared_ptr<STValidation> const& val)
 {
     // VFALCO consider std::shared_mutex
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sValidations].lock);
 
-    if (!mStreamMaps[sValidations].empty())
+    if (streamMaps_[sValidations].map.empty())
+        return;
+
+    Json::Value jvObj(Json::objectValue);
+
+    auto const signerPublic = val->getSignerPublic();
+
+    jvObj[jss::type] = "validationReceived";
+    jvObj[jss::validation_public_key] =
+        toBase58(TokenType::NodePublic, signerPublic);
+    jvObj[jss::ledger_hash] = to_string(val->getLedgerHash());
+    jvObj[jss::signature] = strHex(val->getSignature());
+    jvObj[jss::full] = val->isFull();
+    jvObj[jss::flags] = val->getFlags();
+    jvObj[jss::signing_time] = *(*val)[~sfSigningTime];
+    jvObj[jss::data] = strHex(val->getSerializer().slice());
+
+    if (auto version = (*val)[~sfServerVersion])
+        jvObj[jss::server_version] = std::to_string(*version);
+
+    if (auto cookie = (*val)[~sfCookie])
+        jvObj[jss::cookie] = std::to_string(*cookie);
+
+    if (auto hash = (*val)[~sfValidatedHash])
+        jvObj[jss::validated_hash] = strHex(*hash);
+
+    auto const masterKey = app_.validatorManifests().getMasterKey(signerPublic);
+
+    if (masterKey != signerPublic)
+        jvObj[jss::master_key] = toBase58(TokenType::NodePublic, masterKey);
+
+    if (auto const seq = (*val)[~sfLedgerSequence])
+        jvObj[jss::ledger_index] = to_string(*seq);
+
+    if (val->isFieldPresent(sfAmendments))
     {
-        Json::Value jvObj(Json::objectValue);
+        jvObj[jss::amendments] = Json::Value(Json::arrayValue);
+        for (auto const& amendment : val->getFieldV256(sfAmendments))
+            jvObj[jss::amendments].append(to_string(amendment));
+    }
 
-        auto const signerPublic = val->getSignerPublic();
+    if (auto const closeTime = (*val)[~sfCloseTime])
+        jvObj[jss::close_time] = *closeTime;
 
-        jvObj[jss::type] = "validationReceived";
-        jvObj[jss::validation_public_key] =
-            toBase58(TokenType::NodePublic, signerPublic);
-        jvObj[jss::ledger_hash] = to_string(val->getLedgerHash());
-        jvObj[jss::signature] = strHex(val->getSignature());
-        jvObj[jss::full] = val->isFull();
-        jvObj[jss::flags] = val->getFlags();
-        jvObj[jss::signing_time] = *(*val)[~sfSigningTime];
-        jvObj[jss::data] = strHex(val->getSerializer().slice());
+    if (auto const loadFee = (*val)[~sfLoadFee])
+        jvObj[jss::load_fee] = *loadFee;
 
-        if (auto version = (*val)[~sfServerVersion])
-            jvObj[jss::server_version] = std::to_string(*version);
+    if (auto const baseFee = (*val)[~sfBaseFee])
+        jvObj[jss::base_fee] = static_cast<double>(*baseFee);
 
-        if (auto cookie = (*val)[~sfCookie])
-            jvObj[jss::cookie] = std::to_string(*cookie);
+    if (auto const reserveBase = (*val)[~sfReserveBase])
+        jvObj[jss::reserve_base] = *reserveBase;
 
-        if (auto hash = (*val)[~sfValidatedHash])
-            jvObj[jss::validated_hash] = strHex(*hash);
+    if (auto const reserveInc = (*val)[~sfReserveIncrement])
+        jvObj[jss::reserve_inc] = *reserveInc;
 
-        auto const masterKey =
-            app_.validatorManifests().getMasterKey(signerPublic);
-
-        if (masterKey != signerPublic)
-            jvObj[jss::master_key] = toBase58(TokenType::NodePublic, masterKey);
-
-        if (auto const seq = (*val)[~sfLedgerSequence])
-            jvObj[jss::ledger_index] = to_string(*seq);
-
-        if (val->isFieldPresent(sfAmendments))
+    for (auto i = streamMaps_[sValidations].map.begin();
+         i != streamMaps_[sValidations].map.end();)
+    {
+        if (auto p = i->second.lock())
         {
-            jvObj[jss::amendments] = Json::Value(Json::arrayValue);
-            for (auto const& amendment : val->getFieldV256(sfAmendments))
-                jvObj[jss::amendments].append(to_string(amendment));
+            p->send(jvObj, true);
+            ++i;
         }
-
-        if (auto const closeTime = (*val)[~sfCloseTime])
-            jvObj[jss::close_time] = *closeTime;
-
-        if (auto const loadFee = (*val)[~sfLoadFee])
-            jvObj[jss::load_fee] = *loadFee;
-
-        if (auto const baseFee = (*val)[~sfBaseFee])
-            jvObj[jss::base_fee] = static_cast<double>(*baseFee);
-
-        if (auto const reserveBase = (*val)[~sfReserveBase])
-            jvObj[jss::reserve_base] = *reserveBase;
-
-        if (auto const reserveInc = (*val)[~sfReserveIncrement])
-            jvObj[jss::reserve_inc] = *reserveInc;
-
-        for (auto i = mStreamMaps[sValidations].begin();
-             i != mStreamMaps[sValidations].end();)
+        else
         {
-            if (auto p = i->second.lock())
-            {
-                p->send(jvObj, true);
-                ++i;
-            }
-            else
-            {
-                i = mStreamMaps[sValidations].erase(i);
-            }
+            i = streamMaps_[sValidations].map.erase(i);
         }
     }
 }
@@ -2181,16 +2190,16 @@ NetworkOPsImp::pubValidation(std::shared_ptr<STValidation> const& val)
 void
 NetworkOPsImp::pubPeerStatus(std::function<Json::Value(void)> const& func)
 {
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sPeerStatus].lock);
 
-    if (!mStreamMaps[sPeerStatus].empty())
+    if (!streamMaps_[sPeerStatus].map.empty())
     {
         Json::Value jvObj(func());
 
         jvObj[jss::type] = "peerStatusChange";
 
-        for (auto i = mStreamMaps[sPeerStatus].begin();
-             i != mStreamMaps[sPeerStatus].end();)
+        for (auto i = streamMaps_[sPeerStatus].map.begin();
+             i != streamMaps_[sPeerStatus].map.end();)
         {
             InfoSub::pointer p = i->second.lock();
 
@@ -2201,7 +2210,7 @@ NetworkOPsImp::pubPeerStatus(std::function<Json::Value(void)> const& func)
             }
             else
             {
-                i = mStreamMaps[sPeerStatus].erase(i);
+                i = streamMaps_[sPeerStatus].map.erase(i);
             }
         }
     }
@@ -2648,10 +2657,10 @@ NetworkOPsImp::pubProposedTransaction(
     Json::Value jvObj = transJson(*stTxn, terResult, false, lpCurrent);
 
     {
-        std::lock_guard sl(mSubLock);
+        std::lock_guard sl(streamMaps_[sRTTransactions].lock);
 
-        auto it = mStreamMaps[sRTTransactions].begin();
-        while (it != mStreamMaps[sRTTransactions].end())
+        auto it = streamMaps_[sRTTransactions].map.begin();
+        while (it != streamMaps_[sRTTransactions].map.end())
         {
             InfoSub::pointer p = it->second.lock();
 
@@ -2662,7 +2671,7 @@ NetworkOPsImp::pubProposedTransaction(
             }
             else
             {
-                it = mStreamMaps[sRTTransactions].erase(it);
+                it = streamMaps_[sRTTransactions].map.erase(it);
             }
         }
     }
@@ -2675,16 +2684,16 @@ NetworkOPsImp::pubProposedTransaction(
 void
 NetworkOPsImp::forwardProposedTransaction(Json::Value const& jvObj)
 {
-    // reporting does not forward validated transactions
-    // validated transactions will be published to the proper streams when the
-    // etl process writes a validated ledger
+    // reporting does not forward validated transactions; they will be
+    // published to the proper streams when the etl process writes a
+    // validated ledger
     if (jvObj[jss::validated].asBool())
         return;
     {
-        std::lock_guard sl(mSubLock);
+        std::lock_guard sl(streamMaps_[sRTTransactions].lock);
 
-        auto it = mStreamMaps[sRTTransactions].begin();
-        while (it != mStreamMaps[sRTTransactions].end())
+        auto it = streamMaps_[sRTTransactions].map.begin();
+        while (it != streamMaps_[sRTTransactions].map.end())
         {
             InfoSub::pointer p = it->second.lock();
 
@@ -2695,7 +2704,7 @@ NetworkOPsImp::forwardProposedTransaction(Json::Value const& jvObj)
             }
             else
             {
-                it = mStreamMaps[sRTTransactions].erase(it);
+                it = streamMaps_[sRTTransactions].map.erase(it);
             }
         }
     }
@@ -2706,10 +2715,10 @@ NetworkOPsImp::forwardProposedTransaction(Json::Value const& jvObj)
 void
 NetworkOPsImp::forwardValidation(Json::Value const& jvObj)
 {
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sValidations].lock);
 
-    for (auto i = mStreamMaps[sValidations].begin();
-         i != mStreamMaps[sValidations].end();)
+    for (auto i = streamMaps_[sValidations].map.begin();
+         i != streamMaps_[sValidations].map.end();)
     {
         if (auto p = i->second.lock())
         {
@@ -2718,7 +2727,7 @@ NetworkOPsImp::forwardValidation(Json::Value const& jvObj)
         }
         else
         {
-            i = mStreamMaps[sValidations].erase(i);
+            i = streamMaps_[sValidations].map.erase(i);
         }
     }
 }
@@ -2726,10 +2735,10 @@ NetworkOPsImp::forwardValidation(Json::Value const& jvObj)
 void
 NetworkOPsImp::forwardManifest(Json::Value const& jvObj)
 {
-    std::lock_guard sl(mSubLock);
+    std::lock_guard sl(streamMaps_[sManifests].lock);
 
-    for (auto i = mStreamMaps[sManifests].begin();
-         i != mStreamMaps[sManifests].end();)
+    for (auto i = streamMaps_[sManifests].map.begin();
+         i != streamMaps_[sManifests].map.end();)
     {
         if (auto p = i->second.lock())
         {
@@ -2738,7 +2747,7 @@ NetworkOPsImp::forwardManifest(Json::Value const& jvObj)
         }
         else
         {
-            i = mStreamMaps[sManifests].erase(i);
+            i = streamMaps_[sManifests].map.erase(i);
         }
     }
 }
@@ -2764,8 +2773,6 @@ getAccounts(Json::Value const& jvObj, std::vector<AccountID>& accounts)
 void
 NetworkOPsImp::forwardProposedAccountTransaction(Json::Value const& jvObj)
 {
-    hash_set<InfoSub::pointer> notify;
-    int iProposed = 0;
     // check if there are any subscribers before attempting to parse the JSON
     {
         std::lock_guard sl(mSubLock);
@@ -2773,6 +2780,9 @@ NetworkOPsImp::forwardProposedAccountTransaction(Json::Value const& jvObj)
         if (mSubRTAccount.empty())
             return;
     }
+
+    hash_set<InfoSub::pointer> notify;
+    int iProposed = 0;
 
     // parse the JSON outside of the lock
     std::vector<AccountID> accounts;
@@ -2847,9 +2857,10 @@ NetworkOPsImp::pubLedger(std::shared_ptr<ReadView const> const& lpAccepted)
     {
         JLOG(m_journal.debug())
             << "Publishing ledger = " << lpAccepted->info().seq;
-        std::lock_guard sl(mSubLock);
 
-        if (!mStreamMaps[sLedger].empty())
+        std::lock_guard sl(streamMaps_[sLedger].lock);
+
+        if (!streamMaps_[sLedger].map.empty())
         {
             Json::Value jvObj(Json::objectValue);
 
@@ -2874,40 +2885,39 @@ NetworkOPsImp::pubLedger(std::shared_ptr<ReadView const> const& lpAccepted)
                     app_.getLedgerMaster().getCompleteLedgers();
             }
 
-            auto it = mStreamMaps[sLedger].begin();
-            while (it != mStreamMaps[sLedger].end())
+            auto it = streamMaps_[sLedger].map.begin();
+
+            while (it != streamMaps_[sLedger].map.end())
             {
-                InfoSub::pointer p = it->second.lock();
-                if (p)
+                if (auto p = it->second.lock())
                 {
-                    JLOG(m_journal.debug())
-                        << "Publishing ledger = " << lpAccepted->info().seq
-                        << " : consumer = " << p->getConsumer()
-                        << " : obj = " << jvObj;
                     p->send(jvObj, true);
                     ++it;
+                    continue;
                 }
-                else
-                    it = mStreamMaps[sLedger].erase(it);
+
+                it = streamMaps_[sLedger].map.erase(it);
             }
         }
 
+        static bool firstTime = true;
+
+        if (firstTime)
         {
-            static bool firstTime = true;
-            if (firstTime)
+            // First validated ledger, start delayed SubAccountHistory
+            firstTime = false;
+
+            std::lock_guard sl(mSubLock);
+
+            for (auto& outer : mSubAccountHistory)
             {
-                // First validated ledger, start delayed SubAccountHistory
-                firstTime = false;
-                for (auto& outer : mSubAccountHistory)
+                for (auto& inner : outer.second)
                 {
-                    for (auto& inner : outer.second)
+                    auto& subInfo = inner.second;
+                    if (subInfo.index_->separationLedgerSeq_ == 0)
                     {
-                        auto& subInfo = inner.second;
-                        if (subInfo.index_->separationLedgerSeq_ == 0)
-                        {
-                            subAccountHistoryStart(
-                                alpAccepted->getLedger(), subInfo);
-                        }
+                        subAccountHistoryStart(
+                            alpAccepted->getLedger(), subInfo);
                     }
                 }
             }
@@ -3039,10 +3049,10 @@ NetworkOPsImp::pubValidatedTransaction(
     }
 
     {
-        std::lock_guard sl(mSubLock);
+        std::lock_guard sl(streamMaps_[sTransactions].lock);
 
-        auto it = mStreamMaps[sTransactions].begin();
-        while (it != mStreamMaps[sTransactions].end())
+        auto it = streamMaps_[sTransactions].map.begin();
+        while (it != streamMaps_[sTransactions].map.end())
         {
             InfoSub::pointer p = it->second.lock();
 
@@ -3052,24 +3062,29 @@ NetworkOPsImp::pubValidatedTransaction(
                 ++it;
             }
             else
-                it = mStreamMaps[sTransactions].erase(it);
-        }
-
-        it = mStreamMaps[sRTTransactions].begin();
-
-        while (it != mStreamMaps[sRTTransactions].end())
-        {
-            InfoSub::pointer p = it->second.lock();
-
-            if (p)
-            {
-                p->send(jvObj, true);
-                ++it;
-            }
-            else
-                it = mStreamMaps[sRTTransactions].erase(it);
+                it = streamMaps_[sTransactions].map.erase(it);
         }
     }
+
+    {
+        std::lock_guard sl(streamMaps_[sRTTransactions].lock);
+
+        auto it = streamMaps_[sRTTransactions].map.begin();
+
+        while (it != streamMaps_[sRTTransactions].map.end())
+        {
+            InfoSub::pointer p = it->second.lock();
+
+            if (p)
+            {
+                p->send(jvObj, true);
+                ++it;
+            }
+            else
+                it = streamMaps_[sRTTransactions].map.erase(it);
+        }
+    }
+
     app_.getOrderBookDB().processTxn(alAccepted, alTx, jvObj);
     pubAccountTransaction(alAccepted, alTx, true);
 }
@@ -3217,8 +3232,6 @@ NetworkOPsImp::subAccount(
     hash_set<AccountID> const& vnaAccountIDs,
     bool rt)
 {
-    SubInfoMapType& subMap = rt ? mSubRTAccount : mSubAccount;
-
     for (auto const& naAccountID : vnaAccountIDs)
     {
         JLOG(m_journal.trace())
@@ -3228,6 +3241,8 @@ NetworkOPsImp::subAccount(
     }
 
     std::lock_guard sl(mSubLock);
+
+    auto& subMap = rt ? mSubRTAccount : mSubAccount;
 
     for (auto const& naAccountID : vnaAccountIDs)
     {
@@ -3272,22 +3287,18 @@ NetworkOPsImp::unsubAccountInternal(
 {
     std::lock_guard sl(mSubLock);
 
-    SubInfoMapType& subMap = rt ? mSubRTAccount : mSubAccount;
+    auto& subMap = rt ? mSubRTAccount : mSubAccount;
 
     for (auto const& naAccountID : vnaAccountIDs)
     {
-        auto simIterator = subMap.find(naAccountID);
-
-        if (simIterator != subMap.end())
+        if (auto simIterator = subMap.find(naAccountID);
+            simIterator != subMap.end())
         {
             // Found
             simIterator->second.erase(uSeq);
 
             if (simIterator->second.empty())
-            {
-                // Don't need hash entry.
                 subMap.erase(simIterator);
-            }
         }
     }
 }
@@ -3803,9 +3814,9 @@ NetworkOPsImp::subLedger(InfoSub::ref isrListener, Json::Value& jvResult)
             app_.getLedgerMaster().getCompleteLedgers();
     }
 
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sLedger]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sLedger].lock);
+    return streamMaps_[sLedger]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3813,17 +3824,17 @@ NetworkOPsImp::subLedger(InfoSub::ref isrListener, Json::Value& jvResult)
 bool
 NetworkOPsImp::unsubLedger(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sLedger].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sLedger].lock);
+    return streamMaps_[sLedger].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
 bool
 NetworkOPsImp::subManifests(InfoSub::ref isrListener)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sManifests]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sManifests].lock);
+    return streamMaps_[sManifests]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3831,8 +3842,8 @@ NetworkOPsImp::subManifests(InfoSub::ref isrListener)
 bool
 NetworkOPsImp::unsubManifests(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sManifests].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sManifests].lock);
+    return streamMaps_[sManifests].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
@@ -3859,9 +3870,9 @@ NetworkOPsImp::subServer(
     jvResult[jss::pubkey_node] =
         toBase58(TokenType::NodePublic, app_.nodeIdentity().first);
 
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sServer]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sServer].lock);
+    return streamMaps_[sServer]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3869,17 +3880,17 @@ NetworkOPsImp::subServer(
 bool
 NetworkOPsImp::unsubServer(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sServer].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sServer].lock);
+    return streamMaps_[sServer].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
 bool
 NetworkOPsImp::subTransactions(InfoSub::ref isrListener)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sTransactions]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sTransactions].lock);
+    return streamMaps_[sTransactions]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3887,17 +3898,17 @@ NetworkOPsImp::subTransactions(InfoSub::ref isrListener)
 bool
 NetworkOPsImp::unsubTransactions(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sTransactions].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sTransactions].lock);
+    return streamMaps_[sTransactions].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
 bool
 NetworkOPsImp::subRTTransactions(InfoSub::ref isrListener)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sRTTransactions]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sRTTransactions].lock);
+    return streamMaps_[sRTTransactions]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3905,17 +3916,17 @@ NetworkOPsImp::subRTTransactions(InfoSub::ref isrListener)
 bool
 NetworkOPsImp::unsubRTTransactions(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sRTTransactions].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sRTTransactions].lock);
+    return streamMaps_[sRTTransactions].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
 bool
 NetworkOPsImp::subValidations(InfoSub::ref isrListener)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sValidations]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sValidations].lock);
+    return streamMaps_[sValidations]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3923,17 +3934,17 @@ NetworkOPsImp::subValidations(InfoSub::ref isrListener)
 bool
 NetworkOPsImp::unsubValidations(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sValidations].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sValidations].lock);
+    return streamMaps_[sValidations].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
 bool
 NetworkOPsImp::subPeerStatus(InfoSub::ref isrListener)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sPeerStatus]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sPeerStatus].lock);
+    return streamMaps_[sPeerStatus]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3941,17 +3952,17 @@ NetworkOPsImp::subPeerStatus(InfoSub::ref isrListener)
 bool
 NetworkOPsImp::unsubPeerStatus(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sPeerStatus].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sPeerStatus].lock);
+    return streamMaps_[sPeerStatus].map.erase(uSeq);
 }
 
 // <-- bool: true=added, false=already there
 bool
 NetworkOPsImp::subConsensus(InfoSub::ref isrListener)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sConsensusPhase]
-        .emplace(isrListener->getSeq(), isrListener)
+    std::lock_guard sl(streamMaps_[sConsensusPhase].lock);
+    return streamMaps_[sConsensusPhase]
+        .map.emplace(isrListener->getSeq(), isrListener)
         .second;
 }
 
@@ -3959,8 +3970,8 @@ NetworkOPsImp::subConsensus(InfoSub::ref isrListener)
 bool
 NetworkOPsImp::unsubConsensus(std::uint64_t uSeq)
 {
-    std::lock_guard sl(mSubLock);
-    return mStreamMaps[sConsensusPhase].erase(uSeq);
+    std::lock_guard sl(streamMaps_[sConsensusPhase].lock);
+    return streamMaps_[sConsensusPhase].map.erase(uSeq);
 }
 
 InfoSub::pointer
@@ -3968,12 +3979,10 @@ NetworkOPsImp::findRpcSub(std::string const& strUrl)
 {
     std::lock_guard sl(mSubLock);
 
-    subRpcMapType::iterator it = mRpcSubMap.find(strUrl);
-
-    if (it != mRpcSubMap.end())
+    if (auto it = mRpcSubMap.find(strUrl); it != mRpcSubMap.end())
         return it->second;
 
-    return InfoSub::pointer();
+    return nullptr;
 }
 
 InfoSub::pointer
@@ -3989,21 +3998,38 @@ NetworkOPsImp::addRpcSub(std::string const& strUrl, InfoSub::ref rspEntry)
 bool
 NetworkOPsImp::tryRemoveRpcSub(std::string const& strUrl)
 {
-    std::lock_guard sl(mSubLock);
-    auto pInfo = findRpcSub(strUrl);
+    std::uint64_t id;
 
-    if (!pInfo)
-        return false;
+    {
+        std::lock_guard sl(mSubLock);
+
+        auto sub = findRpcSub(strUrl);
+
+        if (!sub)
+            return false;
+
+        id = sub->getSeq();
+    }
 
     // check to see if any of the stream maps still hold a weak reference to
     // this entry before removing
-    for (SubMapType const& map : mStreamMaps)
+    for (auto const& stream : streamMaps_)
     {
-        if (map.find(pInfo->getSeq()) != map.end())
+        std::lock_guard msl(stream.lock);
+
+        if (stream.map.find(id) != stream.map.end())
             return false;
     }
-    mRpcSubMap.erase(strUrl);
-    return true;
+
+    std::lock_guard sl(mSubLock);
+
+    if (auto sub = findRpcSub(strUrl); sub && sub->getSeq() == id)
+    {
+        mRpcSubMap.erase(strUrl);
+        return true;
+    }
+
+    return false;
 }
 
 #ifndef USE_NEW_BOOK_PAGE
