@@ -613,17 +613,19 @@ private:
         }
     };
 
-    /// Used for sorting @ref MaybeTx by `feeLevel`
-    class GreaterFee
+    /// Used for sorting @ref MaybeTx by `feeLevel` descending, then by
+    /// transaction ID ascending
+    class OrderCandidates
     {
     public:
         /// Default constructor
-        explicit GreaterFee() = default;
+        explicit OrderCandidates() = default;
 
-        /// Is the fee level of `lhs` greater than the fee level of `rhs`?
         bool
         operator()(const MaybeTx& lhs, const MaybeTx& rhs) const
         {
+            if (lhs.feeLevel == rhs.feeLevel)
+                return lhs.txID < rhs.txID;
             return lhs.feeLevel > rhs.feeLevel;
         }
     };
@@ -722,7 +724,7 @@ private:
         &MaybeTx::byFeeListHook>;
 
     using FeeMultiSet = boost::intrusive::
-        multiset<MaybeTx, FeeHook, boost::intrusive::compare<GreaterFee>>;
+        multiset<MaybeTx, FeeHook, boost::intrusive::compare<OrderCandidates>>;
 
     using AccountMap = std::map<AccountID, TxQAccount>;
 
