@@ -98,12 +98,11 @@ TxQ::FeeMetrics::update(
     std::sort(feeLevels.begin(), feeLevels.end());
     assert(size == feeLevels.size());
 
-    JLOG(j_.debug()) << "Ledger " << view.info().seq << " has " << size
-                     << " transactions. "
-                     << "Ledgers are processing "
-                     << (timeLeap ? "slowly" : "as expected")
-                     << ". Expected transactions is currently " << txnsExpected_
-                     << " and multiplier is " << escalationMultiplier_;
+    JLOG((timeLeap ? j_.warn() : j_.debug()))
+        << "Ledger " << view.info().seq << " has " << size << " transactions. "
+        << "Ledgers are processing " << (timeLeap ? "slowly" : "as expected")
+        << ". Expected transactions is currently " << txnsExpected_
+        << " and multiplier is " << escalationMultiplier_;
 
     if (timeLeap)
     {
@@ -1256,7 +1255,7 @@ TxQ::apply(
             // valuable, so kick out the cheapest transaction.
             auto dropRIter = endAccount.transactions.rbegin();
             assert(dropRIter->second.account == lastRIter->account);
-            JLOG(j_.warn())
+            JLOG(j_.info())
                 << "Removing last item of account " << lastRIter->account
                 << " from queue with average fee of " << endEffectiveFeeLevel
                 << " in favor of " << transactionID << " with fee of "
@@ -1265,7 +1264,7 @@ TxQ::apply(
         }
         else
         {
-            JLOG(j_.warn())
+            JLOG(j_.info())
                 << "Queue is full, and transaction " << transactionID
                 << " fee is lower than end item's account average fee";
             return {telCAN_NOT_QUEUE_FULL, false};
@@ -1483,7 +1482,7 @@ TxQ::accept(Application& app, OpenView& view)
                     {
                         // Since the failed transaction has a ticket, order
                         // doesn't matter.  Drop this one.
-                        JLOG(j_.warn())
+                        JLOG(j_.info())
                             << "Queue is nearly full, and transaction "
                             << candidateIter->txID << " failed with "
                             << transToken(txnResult)
@@ -1502,7 +1501,7 @@ TxQ::accept(Application& app, OpenView& view)
                             dropRIter->second.account ==
                             candidateIter->account);
 
-                        JLOG(j_.warn())
+                        JLOG(j_.info())
                             << "Queue is nearly full, and transaction "
                             << candidateIter->txID << " failed with "
                             << transToken(txnResult)
