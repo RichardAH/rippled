@@ -115,7 +115,7 @@ public:
             std::lock_guard _(lock_);
             auto [resultIt, resultInserted] = table_.emplace(
                 std::piecewise_construct,
-                std::make_tuple(kindInbound, address.at_port(0)),  // Key
+                std::make_tuple(kindInbound, address),  // Key
                 std::make_tuple(m_clock.now()));                   // Entry
 
             entry = &resultIt->second;

@@ -529,7 +529,7 @@ ServerHandlerImp::processSession(
     processRequest(
         session->port(),
         buffers_to_string(session->request().body().data()),
-        session->remoteAddress().at_port(0),
+        session->remoteAddress(),
         makeOutput(*session),
         coro,
         forwardedFor(session->request()),
