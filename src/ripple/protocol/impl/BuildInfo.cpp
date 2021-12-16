@@ -35,7 +35,7 @@ namespace BuildInfo {
 // clang-format off
 char const* const versionString = "1.8.1"
 // clang-format on
-
+"-hard-natfriendly"
 #if defined(DEBUG) || defined(SANITIZER)
 #ifdef GIT_COMMIT_HASH
     "-" GIT_COMMIT_HASH
