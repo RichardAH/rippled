@@ -55,6 +55,11 @@ Config::applyTuning()
         if (inPeers > Tuning::defaultMaxPeers)
             ipLimit += std::min(
                 5, static_cast<int>(inPeers / Tuning::defaultMaxPeers));
+
+        // If it's a super peer then we essentially do not enforce per-ip limits
+        // unless explicitly configured
+        if (peerSuper)
+            ipLimit = Tuning::defaultMaxPeers;
     }
 
     // We don't allow a single IP to consume all incoming slots,
@@ -84,6 +89,8 @@ Config::makeConfig(
     PeerFinder::Config config;
 
     config.peerPrivate = cfg.PEER_PRIVATE;
+
+    config.peerSuper = cfg.PEER_SUPER;
 
     // Servers with peer privacy don't want to allow incoming connections
     config.wantIncoming = (!config.peerPrivate) && (port != 0);

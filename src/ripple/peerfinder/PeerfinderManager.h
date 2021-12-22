@@ -75,6 +75,8 @@ struct Config
     /** Limit how many incoming connections we allow per IP */
     int ipLimit;
 
+    /** Allow unlimited connections from local network **/
+    bool peerSuper = false;
     //--------------------------------------------------------------------------
 
     /** Create a configuration with default values. */

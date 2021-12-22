@@ -603,7 +603,7 @@ PeerImp::fail(std::string const& reason)
         return post(
             strand_,
             std::bind(
-                (void (Peer::*)(std::string const&)) & PeerImp::fail,
+                (void(Peer::*)(std::string const&)) & PeerImp::fail,
                 shared_from_this(),
                 reason));
     if (journal_.active(beast::severities::kWarning) && socket_.is_open())
@@ -2621,7 +2621,8 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
     if (packet.query())
     {
         // this is a query
-        if (send_queue_.size() >= Tuning::dropSendQueue)
+        if (!app_.config().PEER_SUPER &&
+            send_queue_.size() >= Tuning::dropSendQueue)
         {
             JLOG(p_journal_.debug()) << "GetObject: Large send queue";
             return;
@@ -3456,16 +3457,20 @@ PeerImp::processLedgerRequest(std::shared_ptr<protocol::TMGetLedger> const& m)
     }
     else
     {
-        if (send_queue_.size() >= Tuning::dropSendQueue)
+        // we will always attempt to reply if we are a super_peer
+        if (!app_.config().PEER_SUPER)
         {
-            JLOG(p_journal_.debug())
-                << "processLedgerRequest: Large send queue";
-            return;
-        }
-        if (app_.getFeeTrack().isLoadedLocal() && !cluster())
-        {
-            JLOG(p_journal_.debug()) << "processLedgerRequest: Too busy";
-            return;
+            if (send_queue_.size() >= Tuning::dropSendQueue)
+            {
+                JLOG(p_journal_.debug())
+                    << "processLedgerRequest: Large send queue";
+                return;
+            }
+            if (app_.getFeeTrack().isLoadedLocal() && !cluster())
+            {
+                JLOG(p_journal_.debug()) << "processLedgerRequest: Too busy";
+                return;
+            }
         }
 
         if (ledger = getLedger(m); !ledger)

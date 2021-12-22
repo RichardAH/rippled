@@ -200,6 +200,10 @@ public:
     std::string SSL_VERIFY_FILE;
     std::string SSL_VERIFY_DIR;
 
+    // If configured as a super peer rippled will always allow peers to join
+    //  and will always service mtGetLedger requests no matter how busy it is
+    bool PEER_SUPER = false;
+
     // Compression
     bool COMPRESSION = false;
 

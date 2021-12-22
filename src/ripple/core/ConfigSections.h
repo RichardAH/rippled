@@ -75,6 +75,7 @@ struct ConfigSection
 #define SECTION_PEERS_MAX "peers_max"
 #define SECTION_PEERS_IN_MAX "peers_in_max"
 #define SECTION_PEERS_OUT_MAX "peers_out_max"
+#define SECTION_PEER_SUPER "peer_super"
 #define SECTION_REDUCE_RELAY "reduce_relay"
 #define SECTION_RELATIONAL_DB "relational_db"
 #define SECTION_RELAY_PROPOSALS "relay_proposals"
