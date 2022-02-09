@@ -318,6 +318,12 @@ message RootIndex
     bytes value = 1;
 }
 
+message WalletLocator
+{
+    // 32 bytes
+    bytes value = 1;
+}
+
 
 // *** Messages wrapping variable length byte arrays ***
 
@@ -497,12 +503,14 @@ message Domain
 
 // *** Aggregate type messages
 
-// Next field: 3
+// Next field: 4
 message SignerEntry
 {
     Account account = 1;
 
     SignerWeight signer_weight = 2;
+
+    WalletLocator wallet_locator = 3;
 }
 
 // Next field: 3

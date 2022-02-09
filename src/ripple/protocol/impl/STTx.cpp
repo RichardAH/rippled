@@ -187,7 +187,9 @@ STTx::sign(PublicKey const& publicKey, SecretKey const& secretKey)
 }
 
 Expected<void, std::string>
-STTx::checkSign(RequireFullyCanonicalSig requireCanonicalSig) const
+STTx::checkSign(
+    RequireFullyCanonicalSig requireCanonicalSig,
+    Rules const& rules) const
 {
     try
     {
@@ -195,8 +197,9 @@ STTx::checkSign(RequireFullyCanonicalSig requireCanonicalSig) const
         // at the SigningPubKey.  If it's empty we must be
         // multi-signing.  Otherwise we're single-signing.
         Blob const& signingPubKey = getFieldVL(sfSigningPubKey);
-        return signingPubKey.empty() ? checkMultiSign(requireCanonicalSig)
-                                     : checkSingleSign(requireCanonicalSig);
+        return signingPubKey.empty()
+            ? checkMultiSign(requireCanonicalSig, rules)
+            : checkSingleSign(requireCanonicalSig);
     }
     catch (std::exception const&)
     {
@@ -308,7 +311,9 @@ STTx::checkSingleSign(RequireFullyCanonicalSig requireCanonicalSig) const
 }
 
 Expected<void, std::string>
-STTx::checkMultiSign(RequireFullyCanonicalSig requireCanonicalSig) const
+STTx::checkMultiSign(
+    RequireFullyCanonicalSig requireCanonicalSig,
+    Rules const& rules) const
 {
     // Make sure the MultiSigners are present.  Otherwise they are not
     // attempting multi-signing and we just have a bad SigningPubKey.
@@ -323,7 +328,8 @@ STTx::checkMultiSign(RequireFullyCanonicalSig requireCanonicalSig) const
     STArray const& signers{getFieldArray(sfSigners)};
 
     // There are well known bounds that the number of signers must be within.
-    if (signers.size() < minMultiSigners || signers.size() > maxMultiSigners)
+    if (signers.size() < minMultiSigners ||
+        signers.size() > maxMultiSigners(&rules))
         return Unexpected("Invalid Signers array size.");
 
     // We can ease the computational load inside the loop a bit by
