@@ -20,7 +20,7 @@
 #include <ripple/app/ledger/LedgerMaster.h>
 #include <ripple/app/ledger/OpenLedger.h>
 #include <ripple/app/misc/Transaction.h>
-#include <ripple/app/paths/RippleState.h>
+#include <ripple/app/paths/TrustLine.h>
 #include <ripple/app/rdb/RelationalDBInterface.h>
 #include <ripple/ledger/View.h>
 #include <ripple/net/RPCErr.h>
@@ -884,7 +884,7 @@ chooseLedgerEntryType(Json::Value const& params)
     std::pair<RPC::Status, LedgerEntryType> result{RPC::Status::OK, ltANY};
     if (params.isMember(jss::type))
     {
-        static constexpr std::array<std::pair<char const*, LedgerEntryType>, 13>
+        static constexpr std::array<std::pair<char const*, LedgerEntryType>, 14>
             types{
                 {{jss::account, ltACCOUNT_ROOT},
                  {jss::amendments, ltAMENDMENTS},
@@ -898,7 +898,8 @@ chooseLedgerEntryType(Json::Value const& params)
                  {jss::payment_channel, ltPAYCHAN},
                  {jss::signer_list, ltSIGNER_LIST},
                  {jss::state, ltRIPPLE_STATE},
-                 {jss::ticket, ltTICKET}}};
+                 {jss::ticket, ltTICKET},
+                 {jss::nft_offer, ltNFTOKEN_OFFER}}};
 
         auto const& p = params[jss::type];
         if (!p.isString())
