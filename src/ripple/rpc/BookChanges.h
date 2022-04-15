@@ -84,30 +84,42 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
             if (nodeType != ltOFFER || metaType == sfCreatedNode)
                 continue;
 
-            STObject& ff = (const_cast<STObject&>(node))
-                               .getField(sfFinalFields)
-                               .downcast<STObject>();
+            // if either FF or PF are missing we can't compute
+            // but generally these are cancelled rather than crossed
+            // so skipping them is consistent
+            if (!node.isFieldPresent(sfFinalFields) || !node.isFieldPresent(sfPreviousFields))
+                continue;
 
+            STObject& finalFields =
+                (const_cast<STObject&>(node))
+                   .getField(sfFinalFields)
+                   .downcast<STObject>();
+
+            STObject& previousFields =
+                (const_cast<STObject&>(node))
+                   .getField(sfPreviousFields)
+                   .downcast<STObject>();
+
+            // defensive case that should never be hit
+            if (!finalFields.isFieldPresent(sfTakerGets) ||
+                !finalFields.isFieldPresent(sfTakerPays) ||
+                !previousFields.isFieldPresent(sfTakerGets) ||
+                !previousFields.isFieldPresent(sfTakerPays))
+                continue;
+            
             // filter out any offers deleted by explicit offer cancels
             if (metaType == sfDeletedNode && offerCancel &&
-                ff.getFieldU32(sfSequence) == *offerCancel)
+                finalFields.getFieldU32(sfSequence) == *offerCancel)
                 continue;
 
-            if (!node.isFieldPresent(sfPreviousFields))
-            {
-                std::cerr << "warning sfPreviousFields not found on "
-                             "ltOFFER meta\n";
-                continue;
-            }
-
-            STObject& mf = (const_cast<STObject&>(node))
-                               .getField(sfPreviousFields)
-                               .downcast<STObject>();
-
-            STAmount deltaGets = ff.getFieldAmount(sfTakerGets) -
-                mf.getFieldAmount(sfTakerGets);
-            STAmount deltaPays = ff.getFieldAmount(sfTakerPays) -
-                mf.getFieldAmount(sfTakerPays);
+            // compute the difference in gets and pays actually
+            // affected onto the offer
+            STAmount deltaGets = 
+                finalFields.getFieldAmount(sfTakerGets) -
+                previousFields.getFieldAmount(sfTakerGets);
+            STAmount deltaPays = 
+                finalFields.getFieldAmount(sfTakerPays) -
+                previousFields.getFieldAmount(sfTakerPays);
 
             std::string g{to_string(deltaGets.issue())};
             std::string p{to_string(deltaPays.issue())};
@@ -116,6 +128,10 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
 
             STAmount first = noswap ? deltaGets : deltaPays;
             STAmount second = noswap ? deltaPays : deltaGets;
+
+            // defensively programmed, should (probably) never happen
+            if (second == beast::zero)
+                continue;
 
             STAmount rate = divide(first, second, noIssue());
 
