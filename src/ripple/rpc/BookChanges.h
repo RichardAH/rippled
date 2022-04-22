@@ -124,7 +124,10 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
             std::string g{to_string(deltaGets.issue())};
             std::string p{to_string(deltaPays.issue())};
 
-            bool const noswap = (g < p);
+            bool const noswap =
+                isXRP(deltaGets) ? true :
+                isXRP(deltaPays) ? false :
+                (g < p);
 
             STAmount first = noswap ? deltaGets : deltaPays;
             STAmount second = noswap ? deltaPays : deltaGets;
