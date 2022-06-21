@@ -212,6 +212,25 @@ preflight1(PreflightContext const& ctx);
 NotTEC
 preflight2(PreflightContext const& ctx);
 
+// get the appropriate form of identifier for the transaction
+// to be used in keyleys that are used to generate on ledger objects.
+template <class C>
+inline static std::variant<uint32_t, uint256>
+seqID(C const& ctx_)
+{
+    // always use the txn hash in place of seq when the txn is emitted.
+    // RH NOTE: no transaction will ever have an emit details block 
+    // until hooks is enabled.
+    if (ctx_.tx.isFieldPresent(sfEmitDetails))
+        return ctx_.tx.getTransactionID();
+
+    // in future more conditions where TXNID is automatically used in place
+    // of seq may be placed here.
+
+    // otherwise use the "normal" seq
+    return ctx_.tx.getSeqProxy().value();
+}
+
 }  // namespace ripple
 
 #endif

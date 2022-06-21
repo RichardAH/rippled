@@ -39,6 +39,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <variant>
 
 namespace beast {
 
@@ -452,6 +453,19 @@ inline std::enable_if_t<
 hash_append(Hasher& h, std::tuple<T...> const& t) noexcept
 {
     detail::tuple_hash(h, t, std::index_sequence_for<T...>{});
+}
+
+// variant
+
+template <class Hasher, class... T>
+inline std::enable_if_t<
+    !is_contiguously_hashable<std::variant<T...>, Hasher>::value>
+hash_append(Hasher& h, std::variant<T...> const& v) noexcept
+{
+    std::visit(
+        [&](auto const& arg){
+            hash_append(h, arg);
+        }, v);
 }
 
 // shared_ptr

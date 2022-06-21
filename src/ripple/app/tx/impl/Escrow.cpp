@@ -33,6 +33,7 @@
 #include <ripple/protocol/TxFlags.h>
 #include <ripple/protocol/digest.h>
 #include <ripple/protocol/st.h>
+#include <variant>
 
 // During an EscrowFinish, the transaction must specify both
 // a condition and a fulfillment. We track whether that
@@ -231,7 +232,7 @@ EscrowCreate::doApply()
     // Create escrow in ledger.  Note that we we use the value from the
     // sequence or ticket.  For more explanation see comments in SeqProxy.h.
     Keylet const escrowKeylet =
-        keylet::escrow(account, ctx_.tx.getSeqProxy().value());
+        keylet::escrow(account, seqID(ctx_));
     auto const slep = std::make_shared<SLE>(escrowKeylet);
     (*slep)[sfAmount] = ctx_.tx[sfAmount];
     (*slep)[sfAccount] = account;
@@ -352,10 +353,33 @@ EscrowFinish::calculateBaseFee(ReadView const& view, STTx const& tx)
     return Transactor::calculateBaseFee(view, tx) + extraFee;
 }
 
+inline
+std::variant<TER, Keylet>
+escrowKeyletFromTx(ApplyContext& ctx_)
+{
+    if (!ctx_.view().rules().enabled(featureSeqID) && ctx_.tx.isFieldPresent(sfEscrowID))
+        return temDISABLED;
+
+    std::optional<uint256> escrowID = ctx_.tx[~sfEscrowID];
+
+    if (escrowID && ctx_.tx[sfOfferSequence] != 0)
+        return temMALFORMED;
+
+    return
+        escrowID
+        ? Keylet(ltESCROW, *escrowID)
+        : keylet::escrow(ctx_.tx[sfOwner], ctx_.tx[sfOfferSequence]);
+}
+
 TER
 EscrowFinish::doApply()
 {
-    auto const k = keylet::escrow(ctx_.tx[sfOwner], ctx_.tx[sfOfferSequence]);
+    auto const kr = escrowKeyletFromTx(ctx_);
+    if (std::holds_alternative<TER>(kr))
+        return std::get<TER>(kr);
+    
+    auto const k = std::get<Keylet>(kr);
+
     auto const slep = ctx_.view().peek(k);
     if (!slep)
         return tecNO_TARGET;
@@ -516,7 +540,12 @@ EscrowCancel::preflight(PreflightContext const& ctx)
 TER
 EscrowCancel::doApply()
 {
-    auto const k = keylet::escrow(ctx_.tx[sfOwner], ctx_.tx[sfOfferSequence]);
+    auto const kr = escrowKeyletFromTx(ctx_);
+    if (std::holds_alternative<TER>(kr))
+        return std::get<TER>(kr);
+    
+    auto const k = std::get<Keylet>(kr);
+
     auto const slep = ctx_.view().peek(k);
     if (!slep)
         return tecNO_TARGET;
