@@ -361,14 +361,15 @@ escrowKeyletFromTx(ApplyContext& ctx_)
         return temDISABLED;
 
     std::optional<uint256> escrowID = ctx_.tx[~sfEscrowID];
+    uint32_t offSeq = ctx_.tx[sfOfferSequence];
 
-    if (escrowID && ctx_.tx[sfOfferSequence] != 0)
+    if (escrowID && offSeq != 0)
         return temMALFORMED;
 
     return
         escrowID
         ? Keylet(ltESCROW, *escrowID)
-        : keylet::escrow(ctx_.tx[sfOwner], ctx_.tx[sfOfferSequence]);
+        : keylet::escrow(ctx_.tx[sfOwner], offSeq);
 }
 
 TER

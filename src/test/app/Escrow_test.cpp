@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <iterator>
 #include <test/jtx.h>
+#include <variant>
 
 namespace ripple {
 namespace test {
@@ -78,6 +79,14 @@ struct Escrow_test : public beast::unit_test::suite
             jt.jv[sfFinishAfter.jsonName] = value_.time_since_epoch().count();
         }
     };
+
+    static uint256
+    getEscrowIndex(
+        jtx::Account const& account,
+        std::uint32_t uSequence)
+    {
+        return keylet::escrow(account.id(), uSequence).key;
+    }
 
     /** Set the "CancelAfter" time tag on a JTx */
     struct cancel_time
@@ -159,18 +168,41 @@ struct Escrow_test : public beast::unit_test::suite
         return jv;
     }
 
+    using seqID_t = std::variant<std::uint32_t, uint256, std::pair<std::uint32_t, uint256>>;
+    static void
+    populateSeqID(Json::Value& jv, seqID_t seqID)
+    {
+        if (std::holds_alternative<std::uint32_t>(seqID))
+        {
+            jv[sfOfferSequence.jsonName] = std::get<0>(seqID);
+        }
+        else if (std::holds_alternative<uint256>(seqID))
+        {
+            jv[sfOfferSequence.jsonName] = 0;
+            jv[sfEscrowID.jsonName] = strHex(std::get<1>(seqID));
+        }
+        else
+        {
+            // this option is used to produce a malformed txn (and test temMALFORMED)
+            // it is malformed to provide both offerseq > 0 and escrowid
+            auto const& p = std::get<2>(seqID);
+            jv[sfOfferSequence.jsonName] = p.first;
+            jv[sfEscrowID.jsonName] = strHex(p.second);
+        }
+    }
+
     static Json::Value
     finish(
         jtx::Account const& account,
         jtx::Account const& from,
-        std::uint32_t seq)
+        seqID_t seqID)
     {
         Json::Value jv;
         jv[jss::TransactionType] = jss::EscrowFinish;
         jv[jss::Flags] = tfUniversal;
         jv[jss::Account] = account.human();
         jv[sfOwner.jsonName] = from.human();
-        jv[sfOfferSequence.jsonName] = seq;
+        populateSeqID(jv, seqID);
         return jv;
     }
 
@@ -178,14 +210,14 @@ struct Escrow_test : public beast::unit_test::suite
     cancel(
         jtx::Account const& account,
         jtx::Account const& from,
-        std::uint32_t seq)
+        seqID_t seqID)
     {
         Json::Value jv;
         jv[jss::TransactionType] = jss::EscrowCancel;
         jv[jss::Flags] = tfUniversal;
         jv[jss::Account] = account.human();
         jv[sfOwner.jsonName] = from.human();
-        jv[sfOfferSequence.jsonName] = seq;
+        populateSeqID(jv, seqID);
         return jv;
     }
 
@@ -493,6 +525,125 @@ struct Escrow_test : public beast::unit_test::suite
                 fulfillment(fb1),
                 fee(1500));
             BEAST_EXPECT(env.balance("bob") == XRP(5100));
+        }
+    }
+    
+    void
+    testSeqID()
+    {
+        testcase("featureSeqID");
+
+        using namespace jtx;
+        using namespace std::chrono;
+
+        // First test attempting to use sfEscrowID in finish/cancel txns
+        // with the amendment disabled (this *must* fail).
+        {
+            Env env(*this, supported_amendments() - featureSeqID);
+
+            env.fund(XRP(5000), "alice", "bob");
+
+            auto const seq1 = env.seq("alice");
+                
+            uint256 const escrow1{getEscrowIndex("alice", seq1)};
+
+            env(escrow("alice", "bob", XRP(1000)),
+                condition(cb1),
+                finish_time(env.now() + 1s),
+                fee(1500));
+            env.close();
+            env(finish("bob", "alice", escrow1),
+                condition(cb1),
+                fulfillment(fb1),
+                fee(1500),
+                ter(temDISABLED));
+                
+
+            auto const seq2 = env.seq("alice");
+            
+            uint256 const escrow2{getEscrowIndex("alice", seq2)};
+
+            env(escrow("alice", "bob", XRP(1000)),
+                condition(cb2),
+                finish_time(env.now() + 1s),
+                cancel_time(env.now() + 2s),
+                fee(1500));
+            env.close();
+            env(cancel("bob", "alice", escrow2), fee(1500),
+                ter(temDISABLED));
+        }
+        
+        // Next test attempting to use sfEscrowID in finsih/cancel txns
+        // with the amendment enabled
+        {
+            Env env{*this, supported_amendments()};
+
+            env.fund(XRP(5000), "alice", "bob");
+
+            auto const seq1 = env.seq("alice");
+                
+            uint256 const escrow1{getEscrowIndex("alice", seq1)};
+
+            env(escrow("alice", "bob", XRP(1000)),
+                condition(cb1),
+                finish_time(env.now() + 1s),
+                fee(1500));
+            env.close();
+            env(finish("bob", "alice", escrow1),
+                condition(cb1),
+                fulfillment(fb1),
+                fee(1500));
+                
+
+            auto const seq2 = env.seq("alice");
+            
+            uint256 const escrow2{getEscrowIndex("alice", seq2)};
+
+            env(escrow("alice", "bob", XRP(1000)),
+                condition(cb2),
+                finish_time(env.now() + 1s),
+                cancel_time(env.now() + 2s),
+                fee(1500));
+            env.close();
+            env(cancel("bob", "alice", escrow2), fee(1500));
+
+        }
+
+        // Construct malformed fin/can txns with both sfOfferSeq and sfEscrowID
+        {
+            Env env{*this, supported_amendments()};
+
+            env.fund(XRP(5000), "alice", "bob");
+
+            auto const seq1 = env.seq("alice");
+                
+            uint256 const escrow1{getEscrowIndex("alice", seq1)};
+
+            env(escrow("alice", "bob", XRP(1000)),
+                condition(cb1),
+                finish_time(env.now() + 1s),
+                fee(1500));
+            env.close();
+            env(finish("bob", "alice", std::pair{seq1, escrow1}),
+                condition(cb1),
+                fulfillment(fb1),
+                fee(1500),
+                ter(temMALFORMED));
+                
+
+            auto const seq2 = env.seq("alice");
+            
+            uint256 const escrow2{getEscrowIndex("alice", seq2)};
+
+            env(escrow("alice", "bob", XRP(1000)),
+                condition(cb2),
+                finish_time(env.now() + 1s),
+                cancel_time(env.now() + 2s),
+                fee(1500));
+            env.close();
+            env(cancel("bob", "alice", std::pair{seq2, escrow2}), fee(1500),
+                    ter(temMALFORMED));
+
         }
     }
 
@@ -950,7 +1101,7 @@ struct Escrow_test : public beast::unit_test::suite
             env.require(balance("carol", XRP(6000)));
             env(cancel("bob", "alice", seq), ter(tecNO_TARGET));
             BEAST_EXPECT((*env.le("alice"))[sfOwnerCount] == 0);
-            env(cancel("bob", "carol", 1), ter(tecNO_TARGET));
+            env(cancel("bob", "carol", 1U), ter(tecNO_TARGET));
         }
         {  // Test cancel when condition is present
             Env env(*this);
@@ -1468,7 +1619,7 @@ struct Escrow_test : public beast::unit_test::suite
         }
 
         {
-            auto const jtx = env.jt(cancel("bob", "alice", 3), seq(1), fee(10));
+            auto const jtx = env.jt(cancel("bob", "alice", 3U), seq(1), fee(10));
             auto const pf = preflight(
                 env.app(),
                 env.current()->rules(),
@@ -1482,7 +1633,7 @@ struct Escrow_test : public beast::unit_test::suite
         }
 
         {
-            auto const jtx = env.jt(finish("bob", "alice", 3), seq(1), fee(10));
+            auto const jtx = env.jt(finish("bob", "alice", 3U), seq(1), fee(10));
             auto const pf = preflight(
                 env.app(),
                 env.current()->rules(),
@@ -1643,6 +1794,7 @@ struct Escrow_test : public beast::unit_test::suite
         testTags();
         testDisallowXRP();
         test1571();
+        testSeqID();
         testFails();
         testLockup();
         testEscrowConditions();

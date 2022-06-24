@@ -131,6 +131,7 @@ TxFormats::TxFormats()
             {sfFulfillment, soeOPTIONAL},
             {sfCondition, soeOPTIONAL},
             {sfTicketSequence, soeOPTIONAL},
+            {sfEscrowID, soeOPTIONAL},
         },
         commonFields);
 
@@ -140,6 +141,7 @@ TxFormats::TxFormats()
             {sfOwner, soeREQUIRED},
             {sfOfferSequence, soeREQUIRED},
             {sfTicketSequence, soeOPTIONAL},
+            {sfEscrowID, soeOPTIONAL},
         },
         commonFields);
 
