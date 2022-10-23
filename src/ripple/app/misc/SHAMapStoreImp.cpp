@@ -471,16 +471,29 @@ SHAMapStoreImp::dbPaths()
     bool writableDbExists = false;
     bool archiveDbExists = false;
 
+    std::cout << "wdb: " << state.writableDb << "\n";
+    std::cout << "adb: " << state.archiveDb << "\n";
+
+
     std::vector<boost::filesystem::path> pathsToDelete;
     for (boost::filesystem::directory_iterator it(dbPath);
          it != boost::filesystem::directory_iterator();
          ++it)
     {
+        bool del = false;
         if (!state.writableDb.compare(it->path().string()))
+        {
             writableDbExists = true;
-        else if (!state.archiveDb.compare(it->path().string()))
+            del = true;
+        }
+
+        if (!state.archiveDb.compare(it->path().string()))
+        {
             archiveDbExists = true;
-        else if (!dbPrefix_.compare(it->path().stem().string()))
+            del = true;
+        }
+        
+        if (del && !dbPrefix_.compare(it->path().stem().string()))
             pathsToDelete.push_back(it->path());
     }
 

@@ -64,9 +64,9 @@ public:
     {
         using namespace boost::filesystem;
         auto const folder = path(name_);
-        auto const fn = (folder / "lmdb.dat").string();
+        auto const fn = (folder).string();
         if (createIfMissing)
-            create_directories((folder / "lmdb.dat").string());
+            create_directories(folder.string());
 
         env_.set_mapsize(10UL * 1024UL * 1024UL * 1024UL * 1024UL);
         env_.open(fn.c_str(), 0, 0664);
@@ -88,7 +88,7 @@ public:
     {
         pno->reset();
 
-        auto rtxn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
+        auto rtxn = lmdb::txn::begin(env_, nullptr); //, MDB_RDONLY);
         auto dbi = lmdb::dbi::open(rtxn, nullptr);
 
         std::string_view value;
@@ -160,7 +160,7 @@ public:
     void
     for_each(std::function<void(std::shared_ptr<NodeObject>)> f) override
     {
-        auto rtxn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
+        auto rtxn = lmdb::txn::begin(env_, nullptr); //, MDB_RDONLY);
         auto dbi = lmdb::dbi::open(rtxn, nullptr);
         auto cursor = lmdb::cursor::open(rtxn, dbi);
         std::string_view key;
@@ -224,7 +224,11 @@ public:
         Scheduler& scheduler,
         beast::Journal journal) override
     {
-        return std::make_unique<LMDBBackend>("lmdb");
+
+
+        return std::make_unique<LMDBBackend>(
+                get(keyValues, "path")
+        );
     }
 };
 
