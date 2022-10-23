@@ -88,7 +88,7 @@ public:
     {
         pno->reset();
 
-        auto rtxn = lmdb::txn::begin(env_, nullptr); //, MDB_RDONLY);
+        auto rtxn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
         auto dbi = lmdb::dbi::open(rtxn, nullptr);
 
         std::string_view value;
@@ -100,12 +100,18 @@ public:
             auto const result = nodeobject_decompress(value.data(), value.size(), bf);
             DecodedBlob decoded(key_raw, result.first, result.second);
             if (!decoded.wasOk())
+            {
+                rtxn.abort();
                 return dataCorrupt;
+            }
             *pno = decoded.createObject();
+            rtxn.abort();
             return ok;
         }
-        else
-            return notFound;
+    
+
+        rtxn.abort();
+        return notFound;
     }
 
     std::pair<std::vector<std::shared_ptr<NodeObject>>, Status>
@@ -160,7 +166,7 @@ public:
     void
     for_each(std::function<void(std::shared_ptr<NodeObject>)> f) override
     {
-        auto rtxn = lmdb::txn::begin(env_, nullptr); //, MDB_RDONLY);
+        auto rtxn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
         auto dbi = lmdb::dbi::open(rtxn, nullptr);
         auto cursor = lmdb::cursor::open(rtxn, dbi);
         std::string_view key;
@@ -175,6 +181,8 @@ public:
 
             f(decoded.createObject());
         }
+        cursor.close();
+        rtxn.abort();
     }
 
     int
