@@ -177,5 +177,3 @@ if (assert)
     STRING (REGEX REPLACE "[-/]DNDEBUG" "" ${var_} "${${var_}}")
   endforeach ()
 endif ()
-  
-string (APPEND CMAKE_CXX_FLAGS " -l:liblmdb.a")

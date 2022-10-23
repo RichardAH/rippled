@@ -30,7 +30,7 @@
 #include <cstdio>
 #include <exception>
 #include <memory>
-#include <lmdb++.h>
+#include <lmdb/lmdb++.h>
 
 namespace ripple {
 namespace NodeStore {
