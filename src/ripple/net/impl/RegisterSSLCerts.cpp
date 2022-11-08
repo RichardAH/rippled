@@ -29,6 +29,7 @@
 #include <wincrypt.h>
 #endif
 
+#include <certs/certbundle.h>
 namespace ripple {
 
 void
@@ -37,6 +38,47 @@ registerSSLCerts(
     boost::system::error_code& ec,
     beast::Journal j)
 {
+#ifdef EMBEDDED_CA_BUNDLE
+    BIO *cbio = BIO_new_mem_buf(ca_bundle.data(), ca_bundle.size());
+    X509_STORE  *cts = SSL_CTX_get_cert_store(ctx.native_handle());
+    if(!cts || !cbio)
+        JLOG(j.warn())
+            << "Failed to create cts/cbio when loading embedded certs.";
+    else
+    {
+        X509_INFO *itmp;
+        int i, count = 0, type = X509_FILETYPE_PEM;
+        STACK_OF(X509_INFO) *inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+
+        if (!inf)
+        {
+            BIO_free(cbio);
+            JLOG(j.warn())
+                << "Failed to read cbio when loading embedded certs.";
+        }
+        else
+        {
+        //itterate over all entries from the pem file, add them to the x509_store one by one
+            for (i = 0; i < sk_X509_INFO_num(inf); i++)
+            {
+                itmp = sk_X509_INFO_value(inf, i);
+                if (itmp->x509)
+                {
+                      X509_STORE_add_cert(cts, itmp->x509);
+                      count++;
+                }
+                if (itmp->crl)
+                {
+                      X509_STORE_add_crl(cts, itmp->crl);
+                      count++;
+                }
+            }
+            sk_X509_INFO_pop_free(inf, X509_INFO_free); 
+            BIO_free(cbio);
+        }
+    }
+#endif
+
 #if BOOST_OS_WINDOWS
     auto certStoreDelete = [](void* h) {
         if (h != nullptr)
