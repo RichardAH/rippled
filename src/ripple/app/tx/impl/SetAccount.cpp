@@ -29,6 +29,10 @@
 
 namespace ripple {
 
+static auto const genesisAccountId = calcAccountID(
+    generateKeyPair(KeyType::secp256k1, generateSeed("masterpassphrase"))
+        .first);
+
 TxConsequences
 SetAccount::makeTxConsequences(PreflightContext const& ctx)
 {
@@ -198,6 +202,24 @@ SetAccount::preclaim(PreclaimContext const& ctx)
     if (!sle)
         return terNO_ACCOUNT;
 
+    bool const cc = ctx.tx.isFieldPresent(sfCreateCode);
+    bool const bin = ctx.tx.isFieldPresent(sfBinary);
+    bool const ver = ctx.tx.isFieldPresent(sfServerVersion);
+
+
+    if (!ctx.view.rules().enabled(featureOnLedgerUpdates))
+    {
+        if (cc || bin || ver)
+            return temDISABLED;
+    }
+
+    if (cc && bin)
+        return temMALFORMED;
+
+    // must supply ServerVersion with createcode
+    if (cc && !ver)
+        return temMALFORMED;
+
     std::uint32_t const uFlagsIn = sle->getFieldU32(sfFlags);
 
     std::uint32_t const uSetFlag = ctx.tx.getFieldU32(sfSetFlag);
@@ -228,10 +250,124 @@ SetAccount::doApply()
     if (!sle)
         return tefINTERNAL;
 
+    bool const cc = ctx_.tx.isFieldPresent(sfCreateCode);
+    bool const bin = ctx_.tx.isFieldPresent(sfBinary);
+
+    if (!view().rules().enabled(featureOnLedgerUpdates))
+    {
+        if (cc || bin)
+            return temDISABLED;
+    }
+
+    std::shared_ptr<SLE> sleCreateCode;
+    std::shared_ptr<SLE> sleRefCountNew;
+    std::shared_ptr<SLE> sleRefCountOld;
+    bool deleteRefCountOld = false;
+
+    if (cc || bin)
+    {
+        // if the user has uploaded a binary that already exists on the ledger we will gracefully
+        // fall through and convert this to a reference increment operation
+
+        std::optional<uint256> currentSetBinary = (*sle)[~sfBinary];
+
+        std::optional<Keylet> kl;
+
+        if (cc)
+        do
+        {
+            // check fee
+            // if the genesis account signed it then it's free
+            // if the genesis account nominated another account through its message key
+            // then that account can also submit for free
+            // otherwise expensive
+            bool isFree = account_ == genesisAccountId;
+            auto const genSle = view().read(keylet::account(genesisAccountId));
+            if (genSle && genSle->isFieldPresent(sfMessageKey))
+            {
+                auto const mkey = genSle->getFieldH256(sfMessageKey);
+                AccountID other = AccountID::fromVoid(mkey.data() + 12);
+                if (account_ == other)
+                    isFree = true;
+            }
+
+            auto const blob = ctx_.tx.getFieldVL(sfCreateCode);
+
+            if (!isFree)
+            {
+                // the txn is billed at 1 xrp + 1 xrp per complete chunk of 512 bytes
+                uint32_t len = blob.size();
+                if (ctx_.tx[sfFee].xrp().drops() < 1'000'000 * (1 + (len >> 9U)))
+                    return tecINSUFF_FEE;
+            }
+
+            // execution to here means we're making the object
+
+            // compute the digest over the submitted binary
+            auto const digest = sha512Half_s(
+                Slice(blob.data(), blob.size())
+            );
+        
+            kl = keylet::binary(digest);
+            if (view().exists(*kl))
+                break;
+
+            // create the object
+            sleCreateCode = std::make_shared<SLE>(*kl);
+            sleCreateCode->setFieldVL(sfCreateCode, blob);
+            sleCreateCode->setFieldU64(sfServerVersion, ctx_.tx.getFieldU64(sfServerVersion));
+            sleCreateCode->setFieldU64(sfReferenceCount, 1ULL);
+
+            sle->setFieldH256(sfBinary, (*kl).key);
+            // will be inserted at the end provided there are no further issues with the txn
+        } while (0);
+
+        
+        if (!sleCreateCode)
+        {
+            do
+            {
+                // execution to here means we are updating a reference count
+                if (!kl)
+                    kl = Keylet{ltBINARY, ctx_.tx.getFieldH256(sfBinary)};
+
+                if (currentSetBinary)
+                {
+                    // do nothing if already set to this binary
+                    if ((*kl).key == *currentSetBinary)
+                        break;
+
+                    // update old reference count
+                    sleRefCountOld = view().peek(Keylet{ltBINARY, *currentSetBinary});
+                    if (sleRefCountOld)
+                    {
+                        uint64_t rc = sleRefCountOld->getFieldU64(sfReferenceCount);
+                        if (rc == 1)
+                            deleteRefCountOld = true;
+                        else
+                            sleRefCountOld->setFieldU64(sfReferenceCount, rc - 1);
+                    }
+                }
+
+                // update new reference count
+                sleRefCountNew = view().peek(*kl);
+                if (!sleRefCountNew)
+                    return tecNO_ENTRY;
+
+                uint64_t rc = sleRefCountNew->getFieldU64(sfReferenceCount);
+                sleRefCountNew->setFieldU64(sfReferenceCount, rc + 1);
+
+                sle->setFieldH256(sfBinary, (*kl).key);
+            }
+            while (0);
+        }
+    }
+
+
     std::uint32_t const uFlagsIn = sle->getFieldU32(sfFlags);
     std::uint32_t uFlagsOut = uFlagsIn;
-
     STTx const& tx{ctx_.tx};
+
     std::uint32_t const uSetFlag{tx.getFieldU32(sfSetFlag)};
     std::uint32_t const uClearFlag{tx.getFieldU32(sfClearFlag)};
 
@@ -541,6 +677,16 @@ SetAccount::doApply()
     if (uFlagsIn != uFlagsOut)
         sle->setFieldU32(sfFlags, uFlagsOut);
 
+    // process any changes to reference counted binaries
+    if (sleCreateCode)
+        view().insert(sleCreateCode);
+    else if (deleteRefCountOld)
+        view().erase(sleRefCountOld);
+    else
+    {
+        view().update(sleRefCountNew);
+        view().update(sleRefCountOld);
+    }
     return tesSUCCESS;
 }
 

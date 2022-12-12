@@ -33,6 +33,16 @@ LedgerFormats::LedgerFormats()
         {sfFlags,                    soeREQUIRED},
     };
 
+    add(jss::Binary,
+        ltBINARY,
+        {
+            {sfDigest,              soeREQUIRED},
+            {sfCreateCode,          soeREQUIRED},
+            {sfServerVersion,       soeREQUIRED},
+            {sfReferenceCount,      soeREQUIRED}
+        },
+        commonFields);
+
     add(jss::AccountRoot,
         ltACCOUNT_ROOT,
         {
@@ -55,6 +65,7 @@ LedgerFormats::LedgerFormats()
             {sfNFTokenMinter,        soeOPTIONAL},
             {sfMintedNFTokens,       soeDEFAULT},
             {sfBurnedNFTokens,       soeDEFAULT},
+            {sfBinary,               soeOPTIONAL}
         },
         commonFields);
 

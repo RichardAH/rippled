@@ -56,6 +56,9 @@ TxFormats::TxFormats()
             {sfTickSize, soeOPTIONAL},
             {sfTicketSequence, soeOPTIONAL},
             {sfNFTokenMinter, soeOPTIONAL},
+            {sfCreateCode, soeOPTIONAL},
+            {sfBinary, soeOPTIONAL},
+            {sfServerVersion, soeOPTIONAL},
         },
         commonFields);
 

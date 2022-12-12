@@ -161,6 +161,12 @@ enum LedgerEntryType : std::uint16_t
      */
     ltNFTOKEN_OFFER = 0x0037,
 
+    /** A ledger object which contains a ref counted server binary
+        
+        \sa keylet::binary
+     */
+    ltBINARY = 0x0062,
+
     //---------------------------------------------------------------------------
     /** A special type, matching any ledger entry type.
 

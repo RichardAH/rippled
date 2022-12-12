@@ -340,7 +340,7 @@ extern uint256 const featureNonFungibleTokensV1_1;
 extern uint256 const fixTrustLinesToSelf;
 extern uint256 const fixRemoveNFTokenAutoTrustLine;
 extern uint256 const featureImmediateOfferKilled;
-
+extern uint256 const featureOnLedgerUpdates;
 }  // namespace ripple
 
 #endif
