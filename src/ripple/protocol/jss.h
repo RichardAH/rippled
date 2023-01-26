@@ -55,6 +55,7 @@ JSS(CheckCancel);            // transaction type.
 JSS(CheckCash);              // transaction type.
 JSS(CheckCreate);            // transaction type.
 JSS(ClearFlag);              // field.
+JSS(CreateCode);             // field.
 JSS(DeliverMin);             // in: TransactionSign
 JSS(DepositPreauth);         // transaction and ledger type.
 JSS(Destination);            // in: TransactionSign; field.
@@ -96,6 +97,7 @@ JSS(UNLModify);              // transaction type.
 JSS(SettleDelay);            // in: TransactionSign
 JSS(SendMax);                // in: TransactionSign
 JSS(Sequence);               // in/out: TransactionSign; field.
+JSS(ServerVersion);          // field.
 JSS(SetFlag);                // field.
 JSS(SetRegularKey);          // transaction type.
 JSS(SignerList);             // ledger type.

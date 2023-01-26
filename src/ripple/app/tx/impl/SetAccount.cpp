@@ -273,6 +273,9 @@ SetAccount::doApply()
 
         std::optional<Keylet> kl;
 
+        bool decOldRefCount = false;
+
+
         if (cc)
         do
         {
@@ -319,6 +322,9 @@ SetAccount::doApply()
             sleCreateCode->setFieldU64(sfReferenceCount, 1ULL);
 
             sle->setFieldH256(sfBinary, (*kl).key);
+            
+            if (currentSetBinary && (*kl).key != *currentSetBinary)
+                decOldRefCount = true;
             // will be inserted at the end provided there are no further issues with the txn
         } while (0);
 
@@ -337,16 +343,7 @@ SetAccount::doApply()
                     if ((*kl).key == *currentSetBinary)
                         break;
 
-                    // update old reference count
-                    sleRefCountOld = view().peek(Keylet{ltBINARY, *currentSetBinary});
-                    if (sleRefCountOld)
-                    {
-                        uint64_t rc = sleRefCountOld->getFieldU64(sfReferenceCount);
-                        if (rc == 1)
-                            deleteRefCountOld = true;
-                        else
-                            sleRefCountOld->setFieldU64(sfReferenceCount, rc - 1);
-                    }
+                    decOldRefCount = true;
                 }
 
                 // update new reference count
@@ -361,6 +358,22 @@ SetAccount::doApply()
             }
             while (0);
         }
+
+
+        if (decOldRefCount)
+        {
+            // update old reference count
+            sleRefCountOld = view().peek(Keylet{ltBINARY, *currentSetBinary});
+            if (sleRefCountOld)
+            {
+                uint64_t rc = sleRefCountOld->getFieldU64(sfReferenceCount);
+                if (rc == 1)
+                    deleteRefCountOld = true;
+                else
+                    sleRefCountOld->setFieldU64(sfReferenceCount, rc - 1);
+            }
+        }
+
     }
 
 
@@ -680,13 +693,12 @@ SetAccount::doApply()
     // process any changes to reference counted binaries
     if (sleCreateCode)
         view().insert(sleCreateCode);
-    else if (deleteRefCountOld)
-        view().erase(sleRefCountOld);
-    else
-    {
+    if (sleRefCountNew)
         view().update(sleRefCountNew);
+    if (deleteRefCountOld)
+        view().erase(sleRefCountOld);
+    else if (sleRefCountOld)
         view().update(sleRefCountOld);
-    }
     return tesSUCCESS;
 }
 
