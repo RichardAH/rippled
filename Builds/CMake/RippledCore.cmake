@@ -969,6 +969,7 @@ if (tests)
     src/test/rpc/Transaction_test.cpp
     src/test/rpc/TransactionEntry_test.cpp
     src/test/rpc/TransactionHistory_test.cpp
+    src/test/app/URIToken_test.cpp
     src/test/rpc/ValidatorInfo_test.cpp
     src/test/rpc/ValidatorRPC_test.cpp
     src/test/rpc/Version_test.cpp

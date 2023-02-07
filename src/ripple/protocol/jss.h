@@ -621,6 +621,7 @@ JSS(unl);                     // out: UnlList
 JSS(unlimited);               // out: Connection.h
 JSS(uptime);                  // out: GetCounts
 JSS(uri);                     // out: ValidatorSites
+JSS(uri_token);               // LedgerEntry
 JSS(URIToken);                // LedgerEntry
 JSS(URITokenMint);            // tx type
 JSS(URITokenBurn);            // tx type
