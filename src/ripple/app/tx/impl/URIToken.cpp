@@ -73,6 +73,15 @@ URIToken::preflight(PreflightContext const& ctx)
             if (flags & tfURITokenNonMintMask)
                 return temINVALID_FLAG;
 
+            if (ctx.tx.isFieldPresent(sfDestination) &&
+                    ctx.tx.getAccountID(sfDestination) == ctx.tx.getAccountID(sfAccount))
+            {
+                JLOG(ctx.j.warn())
+                    << "Malformed transaction. "
+                    << "Cannot create a sell/buy offer to yourself.";
+                return temREDUNDANT;
+            }
+
             auto amt = ctx.tx.getFieldAmount(sfAmount);
 
             if (!isLegalNet(amt) || amt.signum() < 0)
