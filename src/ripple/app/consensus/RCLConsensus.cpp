@@ -866,18 +866,19 @@ RCLConsensus::Adaptor::doAccept(
         app_.getOPs().reportFeeChange();
     }
 
+    auto lgr = ledgerMaster_.getClosedLedger();
     std::cout << "should we generate xpops?"
         << " haveCorrectLCL = " << haveCorrectLCL
         << " result.state = " << (result.state == ConsensusState::Yes)
-        << " standalone = " << app_.config().standalone() << "\n";
+        << " standalone = " << app_.config().standalone()  
+        << " closedLedgerSeq = " << lgr->info().seq << "\n";
     // Are there any marked txn's in the LCL that we need to generate XPOPs for
-    if (haveCorrectLCL && (result.state == ConsensusState::Yes || app_.config().standalone()))
+    if (haveCorrectLCL && (result.state != ConsensusState::No || app_.config().standalone()))
     {
         // populate this vec with txns that have "proof" in the start of a memodata value
         // for these we will generate xpops in a moment
         std::vector<uint256> xpopTxs;
 
-        auto lgr = ledgerMaster_.getValidatedLedger();
 
         auto const& txMap = lgr->txMap();
 
