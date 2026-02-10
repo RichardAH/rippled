@@ -1,20 +1,10 @@
 var searchData=
 [
-  ['sb_0',['SB',['../classripple_1_1test_1_1ElementComboIter.html#a4a14ce172d72da140cb8ae49a8f132dc',1,'ripple::test::ElementComboIter']]],
-  ['serializedtypeid_1',['SerializedTypeID',['../namespaceripple.html#a3e7e3f29aef85bcca06706da54e950fc',1,'ripple']]],
-  ['severity_2',['Severity',['../namespacebeast_1_1severities.html#a069a8a312b9123b77f6aa31733ca73be',1,'beast::severities']]],
-  ['shamapnodetype_3',['SHAMapNodeType',['../namespaceripple.html#ae0356b1de00f841c554c830be509dd58',1,'ripple']]],
-  ['shamapstate_4',['SHAMapState',['../namespaceripple.html#a49003667116eb98c6e966f36e5dd1c77',1,'ripple']]],
-  ['shamaptype_5',['SHAMapType',['../namespaceripple.html#a5d9fe757c37a7602a883d30b14e1bf3c',1,'ripple']]],
-  ['sizeditem_6',['SizedItem',['../namespaceripple.html#a1b38e742ac7fe4c3a80a397e06b83dcb',1,'ripple']]],
-  ['skipentry_7',['SkipEntry',['../namespaceripple.html#a5c353aea81a72e698c287a3e5289619a',1,'ripple']]],
-  ['slotstate_8',['SlotState',['../namespaceripple_1_1reduce__relay.html#a9f15d21d6c73738cdfad6e99d22a001e',1,'ripple::reduce_relay']]],
-  ['smstate_9',['SmState',['../structripple_1_1test_1_1XChainSim__test.html#a2a99bc7a780e6f8e01d013023cb1f65c',1,'ripple::test::XChainSim_test']]],
-  ['soestyle_10',['SOEStyle',['../namespaceripple.html#ad905dc8b70717f4492bebb6b7e189042',1,'ripple']]],
-  ['soetxmptissue_11',['SOETxMPTIssue',['../namespaceripple.html#abd329a8849fd0c4cb884992c5963523d',1,'ripple']]],
-  ['startuptype_12',['StartUpType',['../classripple_1_1Config.html#a6d275f46c1bb19d9a85917de5ca1b99e',1,'ripple::Config']]],
-  ['state_13',['State',['../classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1fe',1,'ripple::PeerFinder::Slot::State()'],['../classripple_1_1LedgerCleanerImp.html#a970ee4182b4988c4a8596c373a6a197f',1,'ripple::LedgerCleanerImp::State()'],['../classripple_1_1test_1_1reduce__relay__test.html#a14441737f30e94f46c7a775c1a504b5b',1,'ripple::test::reduce_relay_test::State()']]],
-  ['status_14',['Status',['../namespaceripple_1_1NodeStore.html#af127c2e4fc73b5d35647147ef45b350c',1,'ripple::NodeStore']]],
-  ['stranddirection_15',['StrandDirection',['../namespaceripple.html#a2fca0f72cfacc04d15ad41d84ebf46fd',1,'ripple']]],
-  ['subtypes_16',['SubTypes',['../classripple_1_1NetworkOPsImp.html#a25ef6ff83343ca08fb82a01247f7a1be',1,'ripple::NetworkOPsImp']]]
+  ['reason_0',['Reason',['../classxrpl_1_1InboundLedger.html#ade00c970d116ec643a4ac7e050b26991',1,'xrpl::InboundLedger']]],
+  ['refstrength_1',['RefStrength',['../classxrpl_1_1SharedWeakUnion.html#a5794cb2d0256c15fbd8e54ed226ed712',1,'xrpl::SharedWeakUnion']]],
+  ['releasestrongrefaction_2',['ReleaseStrongRefAction',['../namespacexrpl.html#adfcfa25ccc459fa509f891e4009ac1e3',1,'xrpl']]],
+  ['releaseweakrefaction_3',['ReleaseWeakRefAction',['../namespacexrpl.html#ae5105aa43ab313d66422a20124fc1116',1,'xrpl']]],
+  ['result_4',['result',['../classxrpl_1_1OpenLedger.html#a9b1e78dd3d9a43e9abbdb2e54f43e74d',1,'xrpl::OpenLedger::Result'],['../namespacexrpl_1_1PeerFinder.html#aac5d7764141c8e3ce52d8d6909a217fc',1,'xrpl::PeerFinder::Result']]],
+  ['role_5',['Role',['../namespacexrpl.html#a7fb64528931ecb2e6dd4bdb6741bd1a7',1,'xrpl']]],
+  ['rounding_5fmode_6',['rounding_mode',['../classxrpl_1_1Number.html#a40e08f75077897215c66d102b5b75f95',1,'xrpl::Number']]]
 ];

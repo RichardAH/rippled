@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['hashprefix_0',['HashPrefix',['../namespaceripple.html#ad5143ceada01141772ae4aab984f94bd',1,'ripple']]],
-  ['healthresult_1',['HealthResult',['../classripple_1_1SHAMapStoreImp.html#aaef701af5fbfe0fe8d445eddc7ccf7c8',1,'ripple::SHAMapStoreImp']]]
+  ['granularpermissiontype_0',['GranularPermissionType',['../namespacexrpl.html#a748d5f3500038734c2e091fbcafe1ce6',1,'xrpl']]]
 ];

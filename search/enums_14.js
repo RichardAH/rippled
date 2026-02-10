@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['waivetransferfee_0',['WaiveTransferFee',['../namespaceripple.html#a9d22f4d38ac33f4258a0205f8e11d27e',1,'ripple']]],
-  ['warning_5fcode_5fi_1',['warning_code_i',['../namespaceripple.html#a53248e40c0a268c7c59fbe4a6e1179d9',1,'ripple']]],
-  ['whichfields_2',['WhichFields',['../classripple_1_1STObject.html#abfe55ede147301d55de3383deb20b288',1,'ripple::STObject']]],
-  ['withclaim_3',['WithClaim',['../structripple_1_1test_1_1XChainSim__test.html#a8026d7aa1a8bb042ae0fbdfe71fcacb7',1,'ripple::test::XChainSim_test']]],
-  ['withdrawall_4',['WithdrawAll',['../namespaceripple.html#a0ef1f7396e14a26a1d23238d68149a63',1,'ripple']]],
-  ['withfile_5',['WithFile',['../classripple_1_1PerfLog__test.html#a47194dbb7ad14c946919c6e54ae25f7e',1,'ripple::PerfLog_test']]]
+  ['validity_0',['Validity',['../namespacexrpl.html#a2aa76dac53b5e6a5517ed343dd592b51',1,'xrpl']]],
+  ['valstatus_1',['ValStatus',['../namespacexrpl.html#a75da7d88563def930b866cd64dd96f06',1,'xrpl']]],
+  ['values_2',['values',['../structxrpl_1_1JsonOptions.html#a248f4c1cb1b2fe05b58678f32307570b',1,'xrpl::JsonOptions']]],
+  ['valuetype_3',['ValueType',['../namespaceJson.html#a7d654b75c16a57007925868e38212b4e',1,'Json']]],
+  ['volume_4',['volume',['../classxrpl_1_1NFTokenBurn__test.html#a8eaf5ed68c5ec6e90ee64d22f6da0b6b',1,'xrpl::NFTokenBurn_test::Volume'],['../classxrpl_1_1NFTokenDir__test.html#a1fc3ab6192562b18f0ffaa42c5184b39',1,'xrpl::NFTokenDir_test::Volume']]],
+  ['votebehavior_5',['VoteBehavior',['../namespacexrpl.html#a3d02416a71398d8466f19a6515c944fe',1,'xrpl']]]
 ];
