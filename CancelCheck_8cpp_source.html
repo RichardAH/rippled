@@ -144,7 +144,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">if</span> (!sleCheck)</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    {</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="comment">// Error should have been caught in preclaim.</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        JLOG(j_.warn()) &lt;&lt; <span class="stringliteral">&quot;Check does not exist.&quot;</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; <span class="stringliteral">&quot;Check does not exist.&quot;</span>;</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacexrpl.html#ad78c115958eec639754bf9227f58556ba348afbc4922cc9b29af76316d5d8a277">tecNO_ENTRY</a>;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
@@ -160,7 +160,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">if</span> (!view().dirRemove(keylet::ownerDir(dstId), page, sleCheck-&gt;<a class="code hl_variable" href="structxrpl_1_1Keylet.html#a03cc2a78d194c2eb48ae173f0db3b22c">key</a>(), <span class="keyword">true</span>))</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        {</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            <span class="comment">// LCOV_EXCL_START</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            JLOG(j_.fatal()) &lt;&lt; <span class="stringliteral">&quot;Unable to delete check from destination.&quot;</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a3dfb8e2e3eecccdb5cf78ff21bca069c">fatal</a>()) &lt;&lt; <span class="stringliteral">&quot;Unable to delete check from destination.&quot;</span>;</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacexrpl.html#a48cab8527194fbd1cfdacad90f977cf1a57944bb500dddfef89ee6543a1408305">tefBAD_LEDGER</a>;</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            <span class="comment">// LCOV_EXCL_STOP</span></div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        }</div>
@@ -170,7 +170,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keywordflow">if</span> (!view().dirRemove(keylet::ownerDir(srcId), page, sleCheck-&gt;<a class="code hl_variable" href="structxrpl_1_1Keylet.html#a03cc2a78d194c2eb48ae173f0db3b22c">key</a>(), <span class="keyword">true</span>))</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        {</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <span class="comment">// LCOV_EXCL_START</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            JLOG(j_.fatal()) &lt;&lt; <span class="stringliteral">&quot;Unable to delete check from owner.&quot;</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a3dfb8e2e3eecccdb5cf78ff21bca069c">fatal</a>()) &lt;&lt; <span class="stringliteral">&quot;Unable to delete check from owner.&quot;</span>;</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>            <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacexrpl.html#a48cab8527194fbd1cfdacad90f977cf1a57944bb500dddfef89ee6543a1408305">tefBAD_LEDGER</a>;</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="comment">// LCOV_EXCL_STOP</span></div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        }</div>
@@ -187,6 +187,7 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}  <span class="comment">// namespace xrpl</span></div>
+<div class="ttc" id="aclassbeast_1_1Journal_html_a3dfb8e2e3eecccdb5cf78ff21bca069c"><div class="ttname"><a href="classbeast_1_1Journal.html#a3dfb8e2e3eecccdb5cf78ff21bca069c">beast::Journal::fatal</a></div><div class="ttdeci">Stream fatal() const</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00324">Journal.h:324</a></div></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html_ad8fefe3e8ad583e1ed1bf02094ac3d8f"><div class="ttname"><a href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">beast::Journal::warn</a></div><div class="ttdeci">Stream warn() const</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00312">Journal.h:312</a></div></div>
 <div class="ttc" id="aclassxrpl_1_1CancelCheck_html_a13007b7825c5e14764ee545525f65fd1"><div class="ttname"><a href="classxrpl_1_1CancelCheck.html#a13007b7825c5e14764ee545525f65fd1">xrpl::CancelCheck::preflight</a></div><div class="ttdeci">static NotTEC preflight(PreflightContext const &amp;ctx)</div><div class="ttdef"><b>Definition</b> <a href="CancelCheck_8cpp_source.html#l00014">CancelCheck.cpp:14</a></div></div>
 <div class="ttc" id="aclassxrpl_1_1CancelCheck_html_aad3658c688dc678d196d42c9f7b64205"><div class="ttname"><a href="classxrpl_1_1CancelCheck.html#aad3658c688dc678d196d42c9f7b64205">xrpl::CancelCheck::preclaim</a></div><div class="ttdeci">static TER preclaim(PreclaimContext const &amp;ctx)</div><div class="ttdef"><b>Definition</b> <a href="CancelCheck_8cpp_source.html#l00020">CancelCheck.cpp:20</a></div></div>

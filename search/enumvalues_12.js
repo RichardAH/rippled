@@ -7,7 +7,7 @@ var searchData=
   ['removed_4',['REMOVED',['../namespacexrpl.html#a34f062517383bad9ba777508d31ac1e2a09a7bcc382729526ac8bd61da7cd879b',1,'xrpl']]],
   ['repeat_5',['Repeat',['../namespacexrpl_1_1test.html#a5661b745c3965d8db802e3f018f72356a7020426cfb0a204051be4b3053d2acc8',1,'xrpl::test']]],
   ['replace_6',['replace',['../classxrpl_1_1detail_1_1RawStateTable.html#a386898a1d1453917a58576b1c4586a3aa9dde360102c103867bd2f45872f1129c',1,'xrpl::detail::RawStateTable']]],
-  ['replay_7',['REPLAY',['../classxrpl_1_1Config.html#ac137fe70fc805bad953335f4f1cc1f4aa708c6c4204c1e961dece9d21a71131ee',1,'xrpl::Config']]],
+  ['replay_7',['REPLAY',['../namespacexrpl.html#aeff8897a4a88b852a68c624eb0377edaa278f5b1d0221f101cf4b1a2bd63e678e',1,'xrpl']]],
   ['replay_5fdelta_5frequest_8',['replay_delta_request',['../classxrpl_1_1TrafficCount.html#a93a9bbac038b491a59722cb03d5285b3a6628e6d8285177ae56fb1dbd59bebdb4',1,'xrpl::TrafficCount']]],
   ['replay_5fdelta_5fresponse_9',['replay_delta_response',['../classxrpl_1_1TrafficCount.html#a93a9bbac038b491a59722cb03d5285b3a6c7937e93e2ae518d90e471d06787855',1,'xrpl::TrafficCount']]],
   ['reply_10',['reply',['../classxrpl_1_1InboundLedger.html#a8f336fb7a8f4c236d797ef03ff6f47c6ae84afaab83ecb301b3d97ce4174d2773',1,'xrpl::InboundLedger']]],

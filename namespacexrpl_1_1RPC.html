@@ -154,11 +154,6 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacexrpl_1_1RPC.html#a326b7cf1183b6f7b5a7fb711ff446f1daaca9ba901559fe2a81e78322b90a80ff">NEEDS_CLOSED_LEDGER</a> = 1 &lt;&lt; 2
  }</td></tr>
 <tr class="separator:a326b7cf1183b6f7b5a7fb711ff446f1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d2ee3ee191de81e32550c09d5806afd" id="r_a3d2ee3ee191de81e32550c09d5806afd"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afd">LedgerShortcut</a> { <a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afda222a267cc5778206b253be35ee3ddab5">Current</a>
-, <a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afda03f4a47830f97377a35321051685071e">Closed</a>
-, <a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afda5364259abab90e94890f2ed2481b9824">Validated</a>
- }</td></tr>
-<tr class="separator:a3d2ee3ee191de81e32550c09d5806afd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -275,12 +270,12 @@ Functions</h2></td></tr>
 <tr class="memdesc:a364c58c4c2ff5806e477aa758ff56447"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a ledger by its sequence index.  <br /></td></tr>
 <tr class="separator:a364c58c4c2ff5806e477aa758ff56447"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6d87ed6a709aa8bc44384ba23eb6d5f" id="r_ad6d87ed6a709aa8bc44384ba23eb6d5f"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:ad6d87ed6a709aa8bc44384ba23eb6d5f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1RPC_1_1Status.html">Status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#ad6d87ed6a709aa8bc44384ba23eb6d5f">getLedger</a> (T &amp;ledger, <a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afd">LedgerShortcut</a> shortcut, <a class="el" href="structxrpl_1_1RPC_1_1Context.html">Context</a> const  &amp;context)</td></tr>
+<tr class="memitem:ad6d87ed6a709aa8bc44384ba23eb6d5f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1RPC_1_1Status.html">Status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#ad6d87ed6a709aa8bc44384ba23eb6d5f">getLedger</a> (T &amp;ledger, <a class="el" href="namespacexrpl.html#a709d0628574726b9aa3968d867c2991a">LedgerShortcut</a> shortcut, <a class="el" href="structxrpl_1_1RPC_1_1Context.html">Context</a> const  &amp;context)</td></tr>
 <tr class="memdesc:ad6d87ed6a709aa8bc44384ba23eb6d5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a ledger specified by a <code>LedgerShortcut</code>.  <br /></td></tr>
 <tr class="separator:ad6d87ed6a709aa8bc44384ba23eb6d5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a334ae3057a97f286186dca7930efc2ca" id="r_a334ae3057a97f286186dca7930efc2ca"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structxrpl_1_1RPC_1_1Status.html">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#a334ae3057a97f286186dca7930efc2ca">getLedger</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &gt; &amp;, uint32_t, <a class="el" href="structxrpl_1_1RPC_1_1Context.html">Context</a> const &amp;)</td></tr>
 <tr class="separator:a334ae3057a97f286186dca7930efc2ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa672feb73803926b735a18ce43476739" id="r_aa672feb73803926b735a18ce43476739"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structxrpl_1_1RPC_1_1Status.html">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#aa672feb73803926b735a18ce43476739">getLedger</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &gt; &amp;, <a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afd">LedgerShortcut</a> shortcut, <a class="el" href="structxrpl_1_1RPC_1_1Context.html">Context</a> const &amp;)</td></tr>
+<tr class="memitem:aa672feb73803926b735a18ce43476739" id="r_aa672feb73803926b735a18ce43476739"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structxrpl_1_1RPC_1_1Status.html">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#aa672feb73803926b735a18ce43476739">getLedger</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &gt; &amp;, <a class="el" href="namespacexrpl.html#a709d0628574726b9aa3968d867c2991a">LedgerShortcut</a> shortcut, <a class="el" href="structxrpl_1_1RPC_1_1Context.html">Context</a> const &amp;)</td></tr>
 <tr class="separator:aa672feb73803926b735a18ce43476739"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8de186154dea79d68d648511c6515a8b" id="r_a8de186154dea79d68d648511c6515a8b"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="structxrpl_1_1RPC_1_1Status.html">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1RPC.html#a8de186154dea79d68d648511c6515a8b">getLedger</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &gt; &amp;, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> const &amp;, <a class="el" href="structxrpl_1_1RPC_1_1Context.html">Context</a> const &amp;)</td></tr>
 <tr class="separator:a8de186154dea79d68d648511c6515a8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -436,7 +431,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8h_source.html#l00067">67</a> of file <a class="el" href="TransactionSign_8h_source.html">TransactionSign.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8h_source.html#l00068">68</a> of file <a class="el" href="TransactionSign_8h_source.html">TransactionSign.h</a>.</p>
 
 </div>
 </div>
@@ -476,35 +471,6 @@ Variables</h2></td></tr>
 </table>
 
 <p class="definition">Definition at line <a class="el" href="Handler_8h_source.html#l00019">19</a> of file <a class="el" href="Handler_8h_source.html">Handler.h</a>.</p>
-
-</div>
-</div>
-<a id="a3d2ee3ee191de81e32550c09d5806afd" name="a3d2ee3ee191de81e32550c09d5806afd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d2ee3ee191de81e32550c09d5806afd">&#9670;&#160;</a></span>LedgerShortcut</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum class <a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afd">xrpl::RPC::LedgerShortcut</a></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3d2ee3ee191de81e32550c09d5806afda222a267cc5778206b253be35ee3ddab5" name="a3d2ee3ee191de81e32550c09d5806afda222a267cc5778206b253be35ee3ddab5"></a>Current&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a3d2ee3ee191de81e32550c09d5806afda03f4a47830f97377a35321051685071e" name="a3d2ee3ee191de81e32550c09d5806afda03f4a47830f97377a35321051685071e"></a>Closed&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a3d2ee3ee191de81e32550c09d5806afda5364259abab90e94890f2ed2481b9824" name="a3d2ee3ee191de81e32550c09d5806afda5364259abab90e94890f2ed2481b9824"></a>Validated&#160;</td><td class="fielddoc"></td></tr>
-</table>
-
-<p class="definition">Definition at line <a class="el" href="RPCLedgerHelpers_8h_source.html#l00022">22</a> of file <a class="el" href="RPCLedgerHelpers_8h_source.html">RPCLedgerHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -2813,7 +2779,7 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afd">LedgerShortcut</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a709d0628574726b9aa3968d867c2991a">LedgerShortcut</a>&#160;</td>
           <td class="paramname"><em>shortcut</em>, </td>
         </tr>
         <tr>
@@ -2901,7 +2867,7 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl_1_1RPC.html#a3d2ee3ee191de81e32550c09d5806afd">LedgerShortcut</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a709d0628574726b9aa3968d867c2991a">LedgerShortcut</a>&#160;</td>
           <td class="paramname"><em>shortcut</em>, </td>
         </tr>
         <tr>
@@ -3510,7 +3476,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8h_source.html#l00071">71</a> of file <a class="el" href="TransactionSign_8h_source.html">TransactionSign.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8h_source.html#l00072">72</a> of file <a class="el" href="TransactionSign_8h_source.html">TransactionSign.h</a>.</p>
 
 </div>
 </div>

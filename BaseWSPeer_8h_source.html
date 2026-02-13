@@ -310,7 +310,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    {</div>
 <div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        cr_.code = <a class="code hl_function" href="namespacexrpl.html#aee66cdd1d58cf6856d6f85d3c824531c">safe_cast</a>&lt;<span class="keyword">decltype</span>(cr_.code)&gt;(boost::beast::websocket::close_code::policy_error);</div>
 <div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        cr_.reason = <span class="stringliteral">&quot;Policy error: client is too slow.&quot;</span>;</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        JLOG(this-&gt;j_.info()) &lt;&lt; cr_.reason;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        JLOG(this-&gt;j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a87d6bd59020d94110027dcab3d9e3357">info</a>()) &lt;&lt; cr_.reason;</div>
 <div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        wq_.erase(<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/iterator/next.html">std::next</a>(wq_.begin()), wq_.end());</div>
 <div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        close(cr_);</div>
 <div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="keywordflow">return</span>;</div>
@@ -537,11 +537,11 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        <span class="keywordflow">if</span> (payload == p)</div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        {</div>
 <div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>            close_on_timer_ = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>            JLOG(this-&gt;j_.trace()) &lt;&lt; <span class="stringliteral">&quot;got matching pong&quot;</span>;</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>            JLOG(this-&gt;j_.<a class="code hl_function" href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">trace</a>()) &lt;&lt; <span class="stringliteral">&quot;got matching pong&quot;</span>;</div>
 <div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        }</div>
 <div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        <span class="keywordflow">else</span></div>
 <div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>        {</div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>            JLOG(this-&gt;j_.trace()) &lt;&lt; <span class="stringliteral">&quot;got pong&quot;</span>;</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>            JLOG(this-&gt;j_.<a class="code hl_function" href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">trace</a>()) &lt;&lt; <span class="stringliteral">&quot;got pong&quot;</span>;</div>
 <div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>        }</div>
 <div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    }</div>
 <div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>}</div>
@@ -567,7 +567,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>                payload_,</div>
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>                bind_executor(</div>
 <div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>                    strand_, <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/utility/functional/bind.html">std::bind</a>(&amp;<a class="code hl_function" href="classxrpl_1_1BaseWSPeer.html#a2f231c89df3b73a9ba2bc25568280387">BaseWSPeer::on_ping</a>, impl().shared_from_this(), std::placeholders::_1)));</div>
-<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>            JLOG(this-&gt;j_.trace()) &lt;&lt; <span class="stringliteral">&quot;sent ping&quot;</span>;</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>            JLOG(this-&gt;j_.<a class="code hl_function" href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">trace</a>()) &lt;&lt; <span class="stringliteral">&quot;sent ping&quot;</span>;</div>
 <div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>            <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>        }</div>
 <div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>        ec = boost::system::errc::make_error_code(boost::system::errc::timed_out);</div>
@@ -587,7 +587,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>    <span class="keywordflow">if</span> (!ec_ &amp;&amp; ec != boost::asio::error::operation_aborted)</div>
 <div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>    {</div>
 <div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>        ec_ = ec;</div>
-<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>        JLOG(this-&gt;j_.trace()) &lt;&lt; what &lt;&lt; <span class="stringliteral">&quot;: &quot;</span> &lt;&lt; ec.message();</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>        JLOG(this-&gt;j_.<a class="code hl_function" href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">trace</a>()) &lt;&lt; what &lt;&lt; <span class="stringliteral">&quot;: &quot;</span> &lt;&lt; ec.message();</div>
 <div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>        <a class="code hl_function" href="namespacexrpl.html#a82730409876bd3e598b502e6c201f320">xrpl::get_lowest_layer</a>(impl().ws_).socket().close(ec);</div>
 <div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>    }</div>
 <div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span>}</div>
@@ -616,6 +616,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aback_inserter_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/iterator/back_inserter.html">std::back_inserter</a></div><div class="ttdeci">T back_inserter(T... args)</div></div>
 <div class="ttc" id="abind_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/functional/bind.html">std::bind</a></div><div class="ttdeci">T bind(T... args)</div></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html"><div class="ttname"><a href="classbeast_1_1Journal.html">beast::Journal</a></div><div class="ttdoc">A generic endpoint for log messages.</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00039">Journal.h:40</a></div></div>
+<div class="ttc" id="aclassbeast_1_1Journal_html_a87d6bd59020d94110027dcab3d9e3357"><div class="ttname"><a href="classbeast_1_1Journal.html#a87d6bd59020d94110027dcab3d9e3357">beast::Journal::info</a></div><div class="ttdeci">Stream info() const</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00306">Journal.h:306</a></div></div>
+<div class="ttc" id="aclassbeast_1_1Journal_html_abbe082bd27ca0f1d1365af2824e4f85b"><div class="ttname"><a href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">beast::Journal::trace</a></div><div class="ttdeci">Stream trace() const</div><div class="ttdoc">Severity stream access functions.</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00294">Journal.h:294</a></div></div>
 <div class="ttc" id="aclassxrpl_1_1BasePeer_html"><div class="ttname"><a href="classxrpl_1_1BasePeer.html">xrpl::BasePeer</a></div><div class="ttdef"><b>Definition</b> <a href="BasePeer_8h_source.html#l00019">BasePeer.h:20</a></div></div>
 <div class="ttc" id="aclassxrpl_1_1BasePeer_html_a18a9bcc10570ba0648a8b54a66ad114f"><div class="ttname"><a href="classxrpl_1_1BasePeer.html#a18a9bcc10570ba0648a8b54a66ad114f">xrpl::BasePeer::strand_</a></div><div class="ttdeci">boost::asio::strand&lt; boost::asio::executor &gt; strand_</div><div class="ttdef"><b>Definition</b> <a href="BasePeer_8h_source.html#l00034">BasePeer.h:34</a></div></div>
 <div class="ttc" id="aclassxrpl_1_1BasePeer_html_a36b3f14817fdcb8275a42c16c0702ec7"><div class="ttname"><a href="classxrpl_1_1BasePeer.html#a36b3f14817fdcb8275a42c16c0702ec7">xrpl::BasePeer::port_</a></div><div class="ttdeci">Port const  &amp; port_</div><div class="ttdef"><b>Definition</b> <a href="BasePeer_8h_source.html#l00027">BasePeer.h:27</a></div></div>
